@@ -266,7 +266,8 @@ export default function OnboardingPage() {
         {currentStep === 3 && (
           <Step3Link
             title="Rejoins le groupe WhatsApp"
-            description="Le groupe privé des membres GLC. Partage, accountability, annonces de Robin."
+            description="Le groupe privé des membres GLC."
+            details="Espace d'échanges quotidiens, accountability entre membres et annonces importantes de Robin."
             icon="💬"
             cta="Rejoindre le groupe"
             url={settings.whatsapp_link}
@@ -277,7 +278,8 @@ export default function OnboardingPage() {
         {currentStep === 4 && (
           <Step3Link
             title="Accède à la communauté Skool"
-            description="Masterclasses, vidéos de formation, espace communautaire des membres GLC."
+            description="La plateforme vidéo & communauté du programme."
+            details="Masterclasses, replays, modules d'entraînement et espace communautaire centralisé."
             icon="🎓"
             cta="Accéder à Skool"
             url={settings.skool_link}
@@ -634,10 +636,11 @@ function QSection7({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: stri
 // ─── Step 3 & 4 — Link Steps ──────────────────────────────────────────────────
 
 function Step3Link({
-  title, description, icon, cta, url, done, onConfirm
+  title, description, details, icon, cta, url, done, onConfirm
 }: {
   title: string
   description: string
+  details?: string
   icon: string
   cta: string
   url: string
@@ -658,7 +661,7 @@ function Step3Link({
 
       <div className="rounded-xl border border-[#2A2A2A] bg-[#141414] p-6 text-center space-y-4">
         <div className="text-5xl">{icon}</div>
-        <p className="text-[#888888] text-sm leading-relaxed">{description}</p>
+        <p className="text-[#888888] text-sm leading-relaxed">{details ?? description}</p>
         <button
           onClick={hasLink ? onConfirm : undefined}
           disabled={!hasLink}
