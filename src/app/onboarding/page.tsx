@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import GlcLogo from '@/components/GlcLogo'
+import { GlcButton } from '@/components/GlcButton'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -186,6 +188,8 @@ export default function OnboardingPage() {
         .from('onboarding_progress')
         .update({ completed_at: new Date().toISOString() })
         .eq('user_id', userId)
+      // Notify coach — fire and forget
+      fetch('/api/onboarding/notify-coach', { method: 'POST' }).catch(() => {})
     }
     setTimeout(() => router.push('/dashboard'), 800)
   }
@@ -197,12 +201,12 @@ export default function OnboardingPage() {
   if (pageLoading) return <LoadingScreen />
 
   return (
-    <div className="min-h-screen bg-[#060606] text-[#F5F5F5]" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen bg-[#060606] text-[#F5F5F5]" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[#060606]/95 backdrop-blur-sm border-b border-[#1E1E1E]">
         <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-[#8B1A1A] font-black tracking-widest text-sm uppercase">GLC</span>
+          <div className="flex items-center gap-3">
+            <GlcLogo size="sm" />
             <span className="text-[#1E1E1E]">|</span>
             <span className="text-[#484848] text-xs uppercase tracking-widest">Onboarding</span>
           </div>
@@ -429,19 +433,14 @@ function Step1Contract({
       </label>
 
       {/* Sign button */}
-      <button
+      <GlcButton
         onClick={onSign}
-        disabled={!accepted || loading}
-        className={`
-          w-full py-4 rounded-xl font-bold text-sm uppercase tracking-widest transition-all
-          ${accepted && !loading
-            ? 'bg-[#8B1A1A] hover:bg-[#A32020] text-white active:scale-[0.98]'
-            : 'bg-[#1E1E1E] text-[#484848] cursor-not-allowed'
-          }
-        `}
+        disabled={!accepted}
+        loading={loading}
+        fullWidth
       >
         {loading ? 'Signature en cours…' : 'Signer le contrat'}
-      </button>
+      </GlcButton>
 
       <p className="text-center text-xs text-[#484848]">
         Ta signature électronique — avec la date, l'heure et ton IP — est enregistrée et juridiquement valide.
@@ -499,28 +498,32 @@ function Step2Questionnaire({
       {/* Navigation */}
       <div className="flex gap-3">
         {section > 1 && (
-          <button
+          <GlcButton
+            variant="ghost"
+            size="md"
             onClick={() => setSection(section - 1)}
-            className="flex-1 py-3.5 rounded-xl border border-[#1E1E1E] text-[#484848] text-sm font-medium hover:border-[#484848] transition-all"
+            className="flex-1"
           >
             ← Précédent
-          </button>
+          </GlcButton>
         )}
         {section < totalSections ? (
-          <button
+          <GlcButton
+            size="md"
             onClick={() => setSection(section + 1)}
-            className="flex-1 py-3.5 rounded-xl bg-[#0F0F0F] border border-[#8B1A1A] text-[#F5F5F5] text-sm font-medium hover:bg-[#8B1A1A]/10 transition-all"
+            className="flex-1"
           >
             Suivant →
-          </button>
+          </GlcButton>
         ) : (
-          <button
+          <GlcButton
+            size="md"
             onClick={onSubmit}
-            disabled={loading}
-            className="flex-1 py-3.5 rounded-xl bg-[#8B1A1A] hover:bg-[#A32020] text-white text-sm font-bold uppercase tracking-widest transition-all active:scale-[0.98]"
+            loading={loading}
+            className="flex-1"
           >
             {loading ? 'Envoi…' : 'Envoyer'}
-          </button>
+          </GlcButton>
         )}
       </div>
     </div>
@@ -672,12 +675,9 @@ function Step3Link({
       <div className="rounded-xl border border-[#1E1E1E] bg-[#0F0F0F] p-6 text-center space-y-4">
         <div className="text-5xl">{icon}</div>
         <p className="text-[#484848] text-sm leading-relaxed">{details ?? description}</p>
-        <button
-          onClick={onConfirm}
-          className="w-full py-4 rounded-xl font-bold text-sm uppercase tracking-widest transition-all active:scale-[0.98] bg-[#8B1A1A] hover:bg-[#A32020] text-white"
-        >
+        <GlcButton onClick={onConfirm} fullWidth>
           {hasLink ? `${cta} →` : 'Passer cette étape →'}
-        </button>
+        </GlcButton>
         <p className="text-xs text-[#484848]">
           {hasLink
             ? "Le lien s'ouvre dans un nouvel onglet. Cette étape sera automatiquement validée."
@@ -737,12 +737,9 @@ function Step5Call({
           <p className="text-[#484848] text-sm leading-relaxed">
             Choisis le créneau qui te convient. Ce call de démarrage est le point de lancement de ta transformation.
           </p>
-          <button
-            onClick={onBook}
-            className="w-full py-4 rounded-xl bg-[#8B1A1A] hover:bg-[#A32020] text-white font-black text-sm uppercase tracking-widest transition-all active:scale-[0.98]"
-          >
+          <GlcButton onClick={onBook} fullWidth>
             Réserver mon call →
-          </button>
+          </GlcButton>
         </div>
       )}
     </div>
@@ -796,7 +793,7 @@ function QInput({
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-lg px-4 py-3 text-sm text-[#F5F5F5] placeholder-[#444444] focus:outline-none focus:border-[#8B1A1A] transition-colors"
+        className="w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-xl px-4 py-3 text-sm text-[#F5F5F5] placeholder-[#444444] focus:outline-none focus:border-[#8B1A1A] focus:shadow-[0_0_0_3px_rgba(139,26,26,0.12)] transition-all"
       />
     </div>
   )
@@ -816,7 +813,7 @@ function QTextarea({
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-lg px-4 py-3 text-sm text-[#F5F5F5] placeholder-[#444444] focus:outline-none focus:border-[#8B1A1A] transition-colors resize-none"
+        className="w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-xl px-4 py-3 text-sm text-[#F5F5F5] placeholder-[#444444] focus:outline-none focus:border-[#8B1A1A] focus:shadow-[0_0_0_3px_rgba(139,26,26,0.12)] transition-all resize-none"
       />
     </div>
   )
@@ -833,7 +830,7 @@ function QSelect({
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-lg px-4 py-3 text-sm text-[#F5F5F5] focus:outline-none focus:border-[#8B1A1A] transition-colors appearance-none"
+        className="w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-xl px-4 py-3 text-sm text-[#F5F5F5] focus:outline-none focus:border-[#8B1A1A] focus:shadow-[0_0_0_3px_rgba(139,26,26,0.12)] transition-all appearance-none"
       >
         <option value="">Choisir…</option>
         {options.map(o => <option key={o} value={o}>{o}</option>)}
@@ -873,7 +870,7 @@ function LoadingScreen() {
   return (
     <div className="min-h-screen bg-[#060606] flex items-center justify-center">
       <div className="space-y-3 text-center">
-        <div className="text-[#8B1A1A] font-black tracking-widest text-lg uppercase">GLC</div>
+        <GlcLogo size="md" />
         <div className="text-[#484848] text-xs animate-pulse">Chargement…</div>
       </div>
     </div>

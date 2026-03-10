@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import GlcLogo from '@/components/GlcLogo'
+import { GlcInput } from '@/components/GlcInput'
+import { GlcButton } from '@/components/GlcButton'
 
 const DEMO_LOGIN_ENABLED =
   process.env.NEXT_PUBLIC_SEED_TEST_USER === 'true'
@@ -37,16 +40,10 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const res = await fetch('/api/dev/create-test-user', {
-        method: 'POST',
-      })
-
-      if (!res.ok) {
-        throw new Error('failed')
-      }
+      const res = await fetch('/api/dev/create-test-user', { method: 'POST' })
+      if (!res.ok) throw new Error('failed')
 
       const { email: demoEmail, password: demoPassword } = await res.json()
-
       const supabase = createClient()
       const { error } = await supabase.auth.signInWithPassword({
         email: demoEmail,
@@ -68,94 +65,80 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(139,26,26,0.08)_0%,_transparent_60%)]" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-glc-accent/5 rounded-full blur-[120px]" />
-      
-      <div className="w-full max-w-sm relative z-10 animate-fade-in">
-        {/* Logo area */}
+      {/* Background */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,26,26,0.1)_0%,transparent_70%)]" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-glc-accent/4 rounded-full blur-[100px] pointer-events-none" />
+
+      <div className="w-full max-w-[360px] relative z-10 animate-fade-in">
+        {/* Logo + heading */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-glc-card border border-glc-border mb-6">
-            <span className="text-2xl font-black text-glc-accent">GL</span>
+          <div className="flex justify-center mb-5">
+            <GlcLogo size="xl" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '1.5rem', letterSpacing: '0.06em', color: '#F2F2F5', textTransform: 'uppercase', marginBottom: 6, whiteSpace: 'nowrap' }}>
             Gentleman Létal Club
           </h1>
-          <p className="text-glc-muted text-sm mt-2">
+          <p style={{ fontSize: '0.8rem', color: '#888', letterSpacing: '0.03em' }}>
             Connecte-toi pour accéder à ton espace
           </p>
         </div>
 
-        {/* Login form */}
-        <div className="bg-glc-card border border-glc-border rounded-2xl p-8">
+        {/* Form card */}
+        <div className="bg-glc-card border border-glc-border rounded-2xl p-7 shadow-[0_8px_40px_rgba(0,0,0,0.5)]">
           <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-xs font-medium text-glc-muted uppercase tracking-wider mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="ton@email.com"
-                required
-                className="w-full px-4 py-3 bg-glc-bg border border-glc-border rounded-xl text-glc-text placeholder:text-glc-muted/50 focus:border-glc-accent focus:outline-none transition-colors text-sm"
-              />
-            </div>
+            <GlcInput
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="ton@email.com"
+              required
+              autoComplete="email"
+            />
 
-            <div>
-              <label className="block text-xs font-medium text-glc-muted uppercase tracking-wider mb-2">
-                Mot de passe
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                className="w-full px-4 py-3 bg-glc-bg border border-glc-border rounded-xl text-glc-text placeholder:text-glc-muted/50 focus:border-glc-accent focus:outline-none transition-colors text-sm"
-              />
-            </div>
+            <GlcInput
+              label="Mot de passe"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              autoComplete="current-password"
+            />
 
             {error && (
-              <div className="text-glc-danger text-sm bg-glc-danger/10 border border-glc-danger/20 rounded-xl px-4 py-3">
+              <div className="text-[#ff6b6b] text-sm bg-[rgba(139,26,26,0.12)] border border-[rgba(139,26,26,0.25)] rounded-xl px-4 py-3">
                 {error}
               </div>
             )}
 
-            <button
+            <GlcButton
               type="submit"
-              disabled={loading || demoLoading}
-              className="w-full py-3.5 bg-glc-accent hover:bg-glc-accent-hover text-white font-semibold rounded-xl transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              loading={loading}
+              disabled={demoLoading}
+              fullWidth
+              className="mt-1"
             >
-              {loading ? (
-                <span className="inline-flex items-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Connexion...
-                </span>
-              ) : (
-                'Se connecter'
-              )}
-            </button>
+              {loading ? 'Connexion...' : 'Se connecter'}
+            </GlcButton>
 
             {DEMO_LOGIN_ENABLED && (
-              <button
+              <GlcButton
                 type="button"
+                variant="ghost"
                 onClick={handleDemoLogin}
-                disabled={demoLoading || loading}
-                className="w-full py-3.5 border border-glc-border text-glc-muted rounded-xl text-sm hover:border-glc-accent/60 hover:text-glc-text transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                loading={demoLoading}
+                disabled={loading}
+                fullWidth
               >
                 {demoLoading ? 'Connexion de démo…' : 'Connexion de démo (auto)'}
-              </button>
+              </GlcButton>
             )}
           </form>
         </div>
 
-        <p className="text-center text-glc-muted/50 text-xs mt-8">
-          Gentleman Létal Club — Tous droits réservés
+        <p className="text-center text-glc-muted/40 text-xs mt-8 tracking-wide">
+          Gentleman Létal Club · 180 jours
         </p>
       </div>
     </div>

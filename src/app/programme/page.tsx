@@ -16,7 +16,7 @@ export default async function ProgrammePage() {
     { data: gamification },
     { data: program },
   ] = await Promise.all([
-    admin.from('onboarding_progress').select('completed_at').eq('client_id', user.id).single(),
+    admin.from('onboarding_progress').select('completed_at').eq('user_id', user.id).single(),
     admin.from('questionnaire_responses').select('responses').eq('client_id', user.id).single(),
     admin.from('gamification').select('xp_total, current_streak, longest_streak, level').eq('client_id', user.id).single(),
     admin.from('programs').select('content').eq('client_id', user.id).maybeSingle(),

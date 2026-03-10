@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import GlcLogo from '@/components/GlcLogo'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -28,12 +29,21 @@ interface Gamification {
   level:          number
 }
 
+interface WeeklyReport {
+  id:               string
+  week_number:      number
+  motivation_score: number | null
+  responses:        Record<string, unknown>
+  submitted_at:     string
+}
+
 interface Props {
   jourX:          number
   email:          string
   responses:      Record<string, unknown>
   gamification:   Gamification
   onboardingDate: string | null
+  weeklyReports:  WeeklyReport[]
 }
 
 // ─── Level system ─────────────────────────────────────────────────────────────
@@ -129,7 +139,7 @@ const SCORE_FIELDS = [
   { key: 'score_social',   label: 'Social' },
 ]
 
-export default function ProfilClient({ jourX, email, responses, gamification, onboardingDate }: Props) {
+export default function ProfilClient({ jourX, email, responses, gamification, onboardingDate, weeklyReports }: Props) {
   const router = useRouter()
   const [activeSection, setActiveSection] = useState(0)
   const [signOutLoading, setSignOutLoading] = useState(false)
@@ -174,23 +184,8 @@ export default function ProfilClient({ jourX, email, responses, gamification, on
         display: 'flex', flexDirection: 'column',
       }}>
         {/* Logo */}
-        <div style={{ padding: '24px 20px 20px', borderBottom: `1px solid ${C.border}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <div style={{
-              width: 36, height: 36, background: C.accent,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-            }}>
-              <span style={{ ...D, fontWeight: 900, fontSize: '14px', color: 'white', letterSpacing: '0.05em' }}>GLC</span>
-            </div>
-            <div>
-              <div style={{ ...D, fontWeight: 900, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: C.text, lineHeight: 1.1 }}>
-                Gentleman
-              </div>
-              <div style={{ ...D, fontWeight: 900, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: C.accent, lineHeight: 1.1 }}>
-                Létal Club
-              </div>
-            </div>
-          </div>
+        <div style={{ padding: '20px 20px 18px', borderBottom: `1px solid ${C.border}` }}>
+          <GlcLogo size="sm" showText />
         </div>
 
         {/* Nav */}
@@ -495,6 +490,7 @@ export default function ProfilClient({ jourX, email, responses, gamification, on
                     cursor: 'pointer',
                     whiteSpace: 'nowrap' as const,
                     flexShrink: 0,
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   {s.label}
@@ -527,6 +523,100 @@ export default function ProfilClient({ jourX, email, responses, gamification, on
               )}
             </div>
           </div>
+
+        {/* ── Weekly Reports ────────────────────────────────────────────────── */}
+        <div style={{ background: C.surface, border: `1px solid ${C.border}`, marginTop: 24 }}>
+          <div style={{ padding: '20px 28px', borderBottom: `1px solid ${C.border}` }}>
+            <h2 style={{ ...D, fontWeight: 700, fontSize: '18px', letterSpacing: '0.05em', textTransform: 'uppercase' as const, color: C.text, margin: 0 }}>
+              Bilans hebdomadaires
+            </h2>
+          </div>
+
+          {weeklyReports.length === 0 ? (
+            <div style={{ padding: '32px 28px', ...D, fontWeight: 700, fontSize: '13px', letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: C.muted }}>
+              Aucun bilan disponible pour l'instant
+            </div>
+          ) : (
+            <div style={{ padding: '20px 28px', display: 'flex', flexDirection: 'column' as const, gap: 16 }}>
+              {weeklyReports.map(report => {
+                const stats = report.responses ?? {}
+                const habitPct   = typeof stats.habit_completion_pct === 'number' ? stats.habit_completion_pct : null
+                const xp         = typeof stats.xp_total === 'number' ? stats.xp_total : null
+                const streak     = typeof stats.streak === 'number' ? stats.streak : null
+                const motiv      = report.motivation_score
+                const reportDate = new Date(report.submitted_at)
+                const weekLabel  = `Semaine ${report.week_number}`
+                const dateLabel  = fmt(reportDate)
+
+                return (
+                  <div
+                    key={report.id}
+                    style={{
+                      background: C.bg,
+                      border: `1px solid ${C.border}`,
+                      padding: '18px 22px',
+                      display: 'flex',
+                      flexDirection: 'column' as const,
+                      gap: 14,
+                    }}
+                  >
+                    {/* Header */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' as const, gap: 8 }}>
+                      <div>
+                        <span style={{ ...D, fontWeight: 800, fontSize: '16px', letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: C.text }}>
+                          {weekLabel}
+                        </span>
+                        <span style={{ ...M, fontSize: '11px', color: C.muted, marginLeft: 12 }}>
+                          {dateLabel}
+                        </span>
+                      </div>
+                      {motiv !== null && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ ...D, fontWeight: 700, fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase' as const, color: C.muted }}>
+                            Motivation
+                          </span>
+                          <span
+                            style={{
+                              ...D, fontWeight: 800, fontSize: '15px',
+                              color: motiv >= 7 ? C.green : motiv >= 4 ? C.gold : '#E05252',
+                            }}
+                          >
+                            {motiv}/10
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Stats row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                      {[
+                        { label: 'Habits', value: habitPct !== null ? `${habitPct}%` : '—' },
+                        { label: 'XP semaine', value: xp !== null ? `+${xp}` : '—' },
+                        { label: 'Streak', value: streak !== null ? `${streak}j` : '—' },
+                      ].map(({ label, value }) => (
+                        <div
+                          key={label}
+                          style={{
+                            background: C.surface,
+                            border: `1px solid ${C.border}`,
+                            padding: '10px 14px',
+                          }}
+                        >
+                          <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: C.muted, marginBottom: 4 }}>
+                            {label}
+                          </div>
+                          <div style={{ ...D, fontWeight: 800, fontSize: '20px', letterSpacing: '0.04em', color: C.text }}>
+                            {value}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
 
         </div>
       </main>

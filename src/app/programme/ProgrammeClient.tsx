@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import GlcLogo from '@/components/GlcLogo'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -178,21 +179,8 @@ export default function ProgrammeClient({
         zIndex: 50,
       }}>
         {/* Logo */}
-        <div style={{ padding: '32px 24px 28px', borderBottom: `1px solid ${C.border}` }}>
-          <div style={{
-            width: 44, height: 44,
-            background: C.accent,
-            clipPath: 'polygon(12% 0%, 88% 0%, 100% 12%, 100% 88%, 88% 100%, 12% 100%, 0% 88%, 0% 12%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            marginBottom: 14,
-          }}>
-            <span style={{ ...D, fontWeight: 900, fontSize: '18px', color: 'white', letterSpacing: '0.05em' }}>
-              GLC
-            </span>
-          </div>
-          <div style={{ ...D, fontWeight: 700, fontSize: '10px', letterSpacing: '0.25em', color: C.muted, textTransform: 'uppercase' as const }}>
-            Gentleman Létal Club
-          </div>
+        <div style={{ padding: '20px 20px 18px', borderBottom: `1px solid ${C.border}` }}>
+          <GlcLogo size="sm" showText />
         </div>
 
         {/* Nav */}

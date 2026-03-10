@@ -275,6 +275,13 @@ export default function DashboardClient({
         }
         .glc-xp-rise   { animation: glc-xp-rise   1.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
         .glc-ring-done { animation: glc-ring-done  0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+        @keyframes glc-habit-check {
+          0%   { transform: scale(1); }
+          40%  { transform: scale(1.22); }
+          70%  { transform: scale(0.92); }
+          100% { transform: scale(1); }
+        }
+        .glc-habit-row:hover { background: rgba(139,26,26,0.06) !important; }
       `}</style>
 
       {/* ── XP Particles overlay ─────────────────────────────────────────────── */}
@@ -586,12 +593,12 @@ export default function DashboardClient({
               { label: 'Record',     val: record,                                           unit: record !== 1 ? 'jours' : 'jour',  color: C.text   },
               { label: 'Classement', val: myRank ? `#${myRank}` : '—',                     unit: `/ ${leaderboard.length || '—'}`, color: myRank && myRank <= 3 ? C.gold : C.text },
             ].map((stat, i) => (
-              <div key={i} style={{ padding: '20px 24px', borderRight: i < 3 ? `1px solid ${C.border}` : 'none' }}>
+              <div key={i} style={{ padding: '20px 24px', borderRight: i < 3 ? `1px solid ${C.border}` : 'none', borderTop: i === 0 ? `2px solid ${C.accent}` : '2px solid transparent' }}>
                 <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.25em', color: C.muted, textTransform: 'uppercase' as const, marginBottom: 8 }}>
                   {stat.label}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
-                  <span style={{ ...M, fontSize: '26px', fontWeight: 700, color: stat.color, lineHeight: 1 }}>
+                  <span style={{ ...M, fontSize: '32px', fontWeight: 700, color: stat.color, lineHeight: 1 }}>
                     {stat.val}
                   </span>
                   <span style={{ ...M, fontSize: '11px', color: C.muted }}>{stat.unit}</span>
@@ -610,20 +617,20 @@ export default function DashboardClient({
                   Missions du jour
                 </h2>
                 {/* Mini ring */}
-                <div className={celebrateRing ? 'glc-ring-done' : undefined} style={{ position: 'relative', width: 44, height: 44, flexShrink: 0 }}>
-                  <svg width={44} height={44} style={{ transform: 'rotate(-90deg)', display: 'block' }}>
-                    <circle cx={22} cy={22} r={17} fill="none" stroke={C.border} strokeWidth={4} />
-                    <circle cx={22} cy={22} r={17} fill="none"
+                <div className={celebrateRing ? 'glc-ring-done' : undefined} style={{ position: 'relative', width: 72, height: 72, flexShrink: 0 }}>
+                  <svg width={72} height={72} style={{ transform: 'rotate(-90deg)', display: 'block' }}>
+                    <circle cx={36} cy={36} r={28} fill="none" stroke={C.border} strokeWidth={5} />
+                    <circle cx={36} cy={36} r={28} fill="none"
                       stroke={allDone ? C.gold : C.accent}
-                      strokeWidth={4}
-                      strokeDasharray={2 * Math.PI * 17}
-                      strokeDashoffset={2 * Math.PI * 17 * (1 - completedPct / 100)}
+                      strokeWidth={5}
+                      strokeDasharray={2 * Math.PI * 28}
+                      strokeDashoffset={2 * Math.PI * 28 * (1 - completedPct / 100)}
                       strokeLinecap="butt"
                       style={{ transition: 'stroke-dashoffset 0.4s ease, stroke 0.3s ease' }}
                     />
                   </svg>
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ ...M, fontSize: '10px', fontWeight: 700, color: C.text }}>{completedCount}/{totalHabits}</span>
+                    <span style={{ ...M, fontSize: '13px', fontWeight: 700, color: C.text }}>{completedPct}%</span>
                   </div>
                 </div>
               </div>
@@ -638,7 +645,7 @@ export default function DashboardClient({
                   Aucune mission assignée
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {habits.map((habit, i) => {
                     const done    = completed.has(habit.id)
                     const loading = loadingId === habit.id
@@ -647,12 +654,12 @@ export default function DashboardClient({
                         key={habit.id}
                         onClick={() => handleToggle(habit.id)}
                         disabled={!!loadingId}
-                        className="glc-slide"
+                        className={`glc-slide glc-habit-row`}
                         style={{
                           animationDelay: `${i * 55}ms`,
                           display: 'flex', alignItems: 'center', gap: 20,
-                          background:  done ? C.surface : C.bg,
-                          border:      `1px solid ${done ? C.border : C.dimmed}`,
+                          background:  done ? `${C.accent}15` : C.bg,
+                          border:      `1px solid ${done ? `${C.accent}40` : C.dimmed}`,
                           borderLeft:  done ? `3px solid ${C.accent}` : '3px solid transparent',
                           padding:     '14px 20px',
                           cursor:      loadingId ? 'wait' : 'pointer',
@@ -675,9 +682,10 @@ export default function DashboardClient({
                           {habit.name}
                         </span>
                         <div style={{
-                          width: 20, height: 20, flexShrink: 0,
+                          width: 26, height: 26, flexShrink: 0,
                           border:     `1.5px solid ${done ? C.accent : C.muted}`,
                           background: done ? C.accent : 'transparent',
+                          boxShadow:  done ? `0 0 10px ${C.accent}70` : 'none',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           transition: 'all 0.15s ease',
                         }}>
@@ -715,8 +723,8 @@ export default function DashboardClient({
                 <div style={{ ...D, fontWeight: 700, fontSize: '11px', letterSpacing: '0.12em', color: C.muted, textTransform: 'uppercase' as const, marginBottom: 16 }}>
                   {level.name}
                 </div>
-                <div style={{ height: 3, background: C.dimmed, marginBottom: nextLevel ? 8 : 16 }}>
-                  <div style={{ height: '100%', width: `${displayedLevelPct}%`, background: `linear-gradient(90deg, ${C.accent}, ${C.accentL})`, transition: 'width 1.4s cubic-bezier(0.4,0,0.2,1)' }} />
+                <div style={{ height: 10, background: C.border, marginBottom: nextLevel ? 8 : 16, borderRadius: 4, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${displayedLevelPct}%`, background: `linear-gradient(90deg, ${C.accent}, ${C.accentL})`, transition: 'width 1.4s cubic-bezier(0.4,0,0.2,1)', boxShadow: `0 0 8px ${C.accent}60` }} />
                 </div>
                 {nextLevel && (
                   <div style={{ ...M, fontSize: '9px', color: C.muted, marginBottom: 16 }}>
@@ -775,7 +783,7 @@ export default function DashboardClient({
                     const reached = streak >= ms
                     return (
                       <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                        <div style={{ height: 3, width: '100%', background: reached ? (ms >= 30 ? C.gold : C.accentL) : C.border }} />
+                        <div style={{ height: 12, width: '100%', background: reached ? (ms >= 30 ? C.gold : C.accentL) : C.border, borderRadius: 2 }} />
                         <span style={{ ...M, fontSize: '8px', color: reached ? (ms >= 30 ? C.gold : C.text) : C.muted }}>
                           {ms}
                         </span>

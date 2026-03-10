@@ -1,0 +1,119 @@
+# GLC APP — CLAUDE.md
+
+Plateforme de coaching 180j "Gentleman Létal Club" par Robin Duplouis.
+
+## Stack
+- **Next.js 16** App Router, React 19, TypeScript, Tailwind CSS 4
+- **Supabase** : auth + DB (RLS activé sur toutes les tables)
+- **Stripe** : webhook → création automatique de compte client
+- **Brevo** : emails transactionnels (SMTP API)
+- **Vercel** : déploiement + crons planifiés
+
+## Dev
+```bash
+cd glc-app
+npm run dev   # port 3000
+```
+
+## Structure des routes
+```
+/                → login
+/onboarding      → flow 5 étapes (nouveau client)
+/dashboard       → check-in habitudes, XP, streaks, leaderboard
+/profil          → stats + réponses questionnaire
+/programme       → viewer programme 180j
+/admin           → panel Robin (config + gestion clients/habits)
+```
+
+## Variables d'environnement requises
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+BREVO_API_KEY=
+NEXT_PUBLIC_APP_URL=https://app.gentlemanletal.club
+CRON_SECRET=<secret aléatoire — Vercel l'envoie dans Authorization: Bearer>
+COACH_EMAIL=robin@gentlemanletal.club
+NEXT_PUBLIC_SEED_TEST_USER=false
+ANTHROPIC_API_KEY=<clé API Anthropic — pour les weekly reports AI>
+```
+
+## DB — Tables et gotchas critiques
+
+### Gotcha #1 — `onboarding_progress` utilise `user_id`, pas `client_id`
+```sql
+-- CORRECT
+.eq('user_id', user.id)
+-- FAUX (toutes les autres tables utilisent client_id)
+.eq('client_id', user.id)
+```
+
+### Gotcha #2 — `habits.created_by` est un enum texte, pas un UUID
+```sql
+created_by text not null check (created_by in ('admin', 'client'))
+-- Toujours insérer 'admin' depuis les routes admin, jamais user.id
+```
+
+### Tables
+| Table | FK principale | Notes |
+|-------|-------------|-------|
+| `profiles` | `id` = auth.users.id | Contient `role` ('admin'/'client'), `email`, `first_name`, `last_name` |
+| `app_settings` | — | 4 champs config (WhatsApp, Skool, iClosed, contrat PDF) |
+| `onboarding_progress` | `user_id` | Étapes 1-5, `completed_at` quand tout est fait |
+| `questionnaire_responses` | `client_id` | 40+ champs réponses formulaire |
+| `programs` | `client_id` | Données programme 180j |
+| `habits` | `client_id` | Habitudes par client, `is_active`, `sort_order` |
+| `habit_logs` | `client_id` | Check-ins quotidiens, `date` (YYYY-MM-DD), `completed` |
+| `weekly_reports` | `client_id` | Rapports hebdo auto, `week_number` (1-26) |
+| `gamification` | `client_id` | `xp_total`, `current_streak`, `level` |
+| `messages` | `sender_id`, `receiver_id` | Messagerie Robin ↔ clients |
+| `milestone_emails_sent` | `client_id` | Déduplique les emails J30/J60/J90/J180 |
+
+## Clients Supabase
+```typescript
+import { createClient } from '@/lib/supabase/server'   // pour les routes authentifiées
+import { createAdminClient } from '@/lib/supabase/admin' // pour les routes admin (bypass RLS)
+```
+
+## Design system
+- **Accent**: `#8B1A1A` (bordeaux) / hover: `#A32020`
+- **Fond OLED**: `#060606` / Surface: `#0F0F0F` / Border: `#1E1E1E`
+- **Muted**: `#484848`
+- **Fonts**: Barlow Condensed (display), JetBrains Mono (mono)
+- UI en français, pas de lib de composants (tout Tailwind custom)
+
+## Crons Vercel (`vercel.json`)
+| Route | Schedule | Rôle |
+|-------|----------|------|
+| `/api/cron/weekly-reports` | Lundi 8h UTC | Génère rapports semaine |
+| `/api/cron/habit-reminders` | Tous les jours 9h UTC | Email si aucun habit coché la veille |
+| `/api/cron/milestone-emails` | Tous les jours 8h UTC | Emails J30/J60/J90/J180 |
+
+Tous les crons vérifient `Authorization: Bearer <CRON_SECRET>`.
+
+## Flux Stripe
+1. Client paie → Stripe envoie webhook `checkout.session.completed`
+2. `/api/webhooks/stripe` → crée user Supabase Auth + insère dans `profiles`, `onboarding_progress`, `programs`, `gamification`
+3. Email de bienvenue Brevo envoyé automatiquement
+
+## Rôles
+- `admin` : accès `/admin`, middleware redirige automatiquement
+- `client` : accès `/dashboard`, `/profil`, `/programme`, `/onboarding`
+- Défini dans `profiles.role`, vérifié dans `src/middleware.ts`
+
+## Migration DB requise avant déploiement
+Exécuter dans Supabase SQL Editor :
+```
+supabase/migrations/20260309_milestone_emails_sent.sql
+```
+
+## Go-live checklist
+- [ ] Migration `milestone_emails_sent` exécutée dans Supabase
+- [ ] Variables d'env configurées dans Vercel (voir liste ci-dessus)
+- [ ] Stripe webhook URL configurée : `https://app.gentlemanletal.club/api/webhooks/stripe`
+- [ ] Robin a entré ses 4 liens dans `/admin` (WhatsApp, Skool, iClosed, contrat PDF)
+- [ ] Compte admin Robin créé (role = 'admin' dans `profiles`)
+- [ ] Domaine `app.gentlemanletal.club` → CNAME vers `cname.vercel-dns.com`
+- [ ] Test E2E : paiement Stripe → email → login → onboarding → dashboard

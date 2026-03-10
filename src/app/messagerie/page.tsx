@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
-import ProfilClient from './ProfilClient'
+import MessagerieClient from './MessagerieClient'
 
-export default async function ProfilPage() {
+export default async function MessageriePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -14,12 +14,17 @@ export default async function ProfilPage() {
     { data: onboarding },
     { data: questionnaire },
     { data: gamification },
-    { data: weeklyReports },
+    { data: messages },
   ] = await Promise.all([
     admin.from('onboarding_progress').select('completed_at').eq('user_id', user.id).single(),
     admin.from('questionnaire_responses').select('responses').eq('client_id', user.id).single(),
     admin.from('gamification').select('xp_total, current_streak, longest_streak, level').eq('client_id', user.id).single(),
-    admin.from('weekly_reports').select('id, week_number, motivation_score, responses, submitted_at').eq('client_id', user.id).order('week_number', { ascending: false }),
+    admin
+      .from('messages')
+      .select('*')
+      .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
+      .order('created_at', { ascending: true })
+      .limit(200),
   ])
 
   // Jour X / 180
@@ -30,18 +35,29 @@ export default async function ProfilPage() {
   }
 
   const responses = (questionnaire?.responses as Record<string, unknown>) ?? {}
+  const rawName   = (responses.full_name as string) ?? ''
+  const firstName = rawName.split(' ')[0] || 'Client'
 
   return (
-    <ProfilClient
+    <MessagerieClient
       jourX={jourX}
-      email={user.email ?? ''}
-      responses={responses}
+      firstName={firstName}
+      userId={user.id}
       gamification={
         (gamification as { xp_total: number; current_streak: number; longest_streak: number; level: number })
         ?? { xp_total: 0, current_streak: 0, longest_streak: 0, level: 1 }
       }
+      initialMessages={(messages ?? []) as Message[]}
       onboardingDate={onboarding?.completed_at ?? null}
-      weeklyReports={(weeklyReports ?? []) as Array<{ id: string; week_number: number; motivation_score: number | null; responses: Record<string, unknown>; submitted_at: string }>}
     />
   )
+}
+
+export type Message = {
+  id:           string
+  sender_id:    string
+  recipient_id: string
+  content:      string
+  read:         boolean
+  created_at:   string
 }

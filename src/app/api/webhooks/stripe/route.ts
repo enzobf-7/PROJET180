@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     const userId = authUser.user.id
 
-    await supabase.from('onboarding_progress').insert({ client_id: userId })
+    await supabase.from('onboarding_progress').insert({ user_id: userId })
     await supabase.from('programs').insert({ client_id: userId, content: [] })
     await supabase.from('gamification').insert({ client_id: userId })
 
@@ -118,7 +118,7 @@ async function sendWelcomeEmail(email: string, firstName: string, password: stri
               <p style="margin: 4px 0; color: #F5F5F5;"><strong>Mot de passe :</strong> ${password}</p>
               <p style="margin: 8px 0 0; color: #888; font-size: 12px;">Change ton mot de passe après ta première connexion.</p>
             </div>
-            <a href="${appUrl}" style="display: inline-block; background: #C41E2A; color: white; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 600; margin-top: 8px;">
+            <a href="${appUrl}" style="display: inline-block; background: #8B1A1A; color: white; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 600; margin-top: 8px;">
               Accéder à ma plateforme
             </a>
             <p style="color: #555; font-size: 13px; margin-top: 32px;">
