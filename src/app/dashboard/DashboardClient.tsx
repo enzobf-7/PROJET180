@@ -499,12 +499,18 @@ export default function DashboardClient({
           <div style={{ height: 2, background: C.dimmed }}>
             <div style={{ height: '100%', width: `${daysPct}%`, background: `linear-gradient(90deg, ${C.accent}, ${C.accentL})`, transition: 'width 1.2s ease' }} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '12px 16px' : '12px 40px' }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-              <span style={{ ...D, fontWeight: 900, fontSize: '26px', letterSpacing: '0.06em', color: C.text, lineHeight: 1 }}>
-                JOUR {jourX}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '10px 16px' : '10px 40px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <span style={{ ...D, fontWeight: 900, fontSize: '13px', letterSpacing: '0.32em', color: C.accent, textTransform: 'uppercase' as const }}>
+                GLC
               </span>
-              <span style={{ ...M, fontSize: '11px', color: C.muted }}>/ 180 — {daysLeft}j restants</span>
+              <div style={{ width: 1, height: 14, background: C.border }} />
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
+                <span style={{ ...D, fontWeight: 900, fontSize: '18px', letterSpacing: '0.06em', color: C.text, lineHeight: 1 }}>
+                  JOUR {String(jourX).padStart(3, '0')}
+                </span>
+                <span style={{ ...M, fontSize: '10px', color: C.muted }}>/ 180 — {daysLeft}j</span>
+              </div>
             </div>
             {!isMobile && onboardingDate && (
               <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
@@ -526,53 +532,48 @@ export default function DashboardClient({
 
         {/* ── Hero ────────────────────────────────────────────────────────────*/}
         <div style={{
-          background: `linear-gradient(160deg, #0D0608 0%, ${C.bg} 100%)`,
+          position: 'relative',
+          background: `radial-gradient(ellipse 90% 140% at 0% 60%, #1F0308 0%, #0E0507 40%, ${C.bg} 100%)`,
           borderBottom: `1px solid ${C.border}`,
-          padding: isMobile ? '16px 16px' : '20px 40px',
+          padding: isMobile ? '28px 20px 22px' : '36px 40px 26px',
+          overflow: 'hidden',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 10 : 16, flexWrap: 'wrap' as const }}>
-            <span style={{
-              ...D, fontWeight: 700, fontSize: '22px',
-              textTransform: 'uppercase' as const,
-              letterSpacing: '0.04em', color: C.text,
-            }}>
-              {firstName}
+          {/* Ambient glow */}
+          <div style={{ position: 'absolute', top: '-60px', left: '-80px', width: '280px', height: '280px', background: `radial-gradient(circle, ${C.accent}18 0%, transparent 65%)`, pointerEvents: 'none' }} />
+          {/* Overline */}
+          <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.35em', color: C.accent, textTransform: 'uppercase' as const, marginBottom: 10, position: 'relative' }}>
+            Programme 180j — Gentleman Létal Club
+          </div>
+          {/* Big day number row */}
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: isMobile ? 12 : 20, marginBottom: 16, position: 'relative' }}>
+            <span style={{ ...D, fontWeight: 900, fontSize: isMobile ? '60px' : '76px', letterSpacing: '-0.01em', color: C.text, lineHeight: 0.88 }}>
+              JOUR&nbsp;{String(jourX).padStart(3, '0')}
             </span>
-            <span style={{ color: C.border, fontSize: '16px', lineHeight: 1 }}>·</span>
-            <span style={{
-              ...D, fontWeight: 700, fontSize: '13px',
-              letterSpacing: '0.2em', textTransform: 'uppercase' as const,
-              color: C.accent, borderLeft: `2px solid ${C.accent}`, paddingLeft: 8,
-            }}>
-              {level.name}
-            </span>
-            {myRank && (
-              <>
-                <span style={{ color: C.border, fontSize: '16px', lineHeight: 1 }}>·</span>
-                <span style={{
-                  ...M, fontSize: '11px',
-                  color: myRank <= 3 ? C.accent : C.muted,
-                  border: `1px solid ${myRank <= 3 ? C.accent : C.border}`,
-                  padding: '2px 8px',
-                }}>
-                  #{myRank} sur {leaderboard.length}
-                </span>
-              </>
-            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5, paddingBottom: isMobile ? 7 : 9 }}>
+              <span style={{ ...D, fontWeight: 700, fontSize: '13px', letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: C.accent }}>
+                {level.name}
+              </span>
+              <span style={{ ...D, fontWeight: 500, fontSize: '11px', color: C.muted, letterSpacing: '0.1em' }}>
+                {firstName.toUpperCase()}{myRank ? ` · #${myRank}` : ''}
+              </span>
+            </div>
             {allDone && (
-              <>
-                <span style={{ color: C.border, fontSize: '16px', lineHeight: 1 }}>·</span>
-                <span style={{
-                  ...D, fontWeight: 900, fontSize: '11px', letterSpacing: '0.2em',
-                  textTransform: 'uppercase' as const,
-                  color: C.accent,
-                  border: `1px solid ${C.accent}40`,
-                  padding: '3px 10px',
-                }}>
-                  Mission accomplie
-                </span>
-              </>
+              <span style={{
+                ...D, fontWeight: 900, fontSize: '10px', letterSpacing: '0.22em',
+                textTransform: 'uppercase' as const,
+                color: C.accent, border: `1px solid ${C.accent}`,
+                padding: '5px 12px', marginLeft: 'auto', alignSelf: 'center',
+              }}>
+                Mission accomplie
+              </span>
             )}
+          </div>
+          {/* 180-day progress bar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, position: 'relative' }}>
+            <div style={{ flex: 1, height: 2, background: C.dimmed, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${daysPct}%`, background: `linear-gradient(90deg, ${C.accent}, ${C.accentL})`, transition: 'width 1.2s ease' }} />
+            </div>
+            <span style={{ ...M, fontSize: '10px', color: C.muted, whiteSpace: 'nowrap' as const }}>{jourX} / 180</span>
           </div>
         </div>
 
@@ -581,10 +582,13 @@ export default function DashboardClient({
 
 
           {/* Two-column grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 320px', gap: 24, alignItems: 'start', marginBottom: 48 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 320px', gap: 24, alignItems: 'start', marginBottom: 32 }}>
 
             {/* ── Missions ──────────────────────────────────────────────── */}
             <div style={{ minWidth: 0 }}>
+              <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.3em', color: C.accent, textTransform: 'uppercase' as const, marginBottom: 8 }}>
+                Check-in quotidien
+              </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
                 <h2 style={{ ...D, fontWeight: 900, fontSize: '20px', letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: C.text, margin: 0, flex: 1 }}>
                   Missions du jour
@@ -594,7 +598,7 @@ export default function DashboardClient({
                   <svg width={72} height={72} style={{ transform: 'rotate(-90deg)', display: 'block' }}>
                     <circle cx={36} cy={36} r={28} fill="none" stroke={C.border} strokeWidth={5} />
                     <circle cx={36} cy={36} r={28} fill="none"
-                      stroke={C.accent}
+                      stroke={allDone ? C.accentL : C.accent}
                       strokeWidth={5}
                       strokeDasharray={2 * Math.PI * 28}
                       strokeDashoffset={2 * Math.PI * 28 * (1 - completedPct / 100)}
@@ -602,8 +606,9 @@ export default function DashboardClient({
                       style={{ transition: 'stroke-dashoffset 0.4s ease, stroke 0.3s ease' }}
                     />
                   </svg>
-                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ ...M, fontSize: '13px', fontWeight: 700, color: C.text }}>{completedPct}%</span>
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                    <span style={{ ...D, fontSize: '15px', fontWeight: 900, color: C.text, lineHeight: 1 }}>{completed.size}</span>
+                    <span style={{ ...M, fontSize: '8px', color: C.muted }}>/ {habits.length}</span>
                   </div>
                 </div>
               </div>
@@ -631,8 +636,8 @@ export default function DashboardClient({
                         style={{
                           animationDelay: `${i * 55}ms`,
                           display: 'flex', alignItems: 'center', gap: 20,
-                          background:  done ? `${C.accent}15` : C.bg,
-                          border:      `1px solid ${done ? `${C.accent}40` : C.dimmed}`,
+                          background:  done ? `${C.accent}15` : C.surface,
+                          border:      `1px solid ${done ? `${C.accent}40` : C.border}`,
                           borderLeft:  done ? `3px solid ${C.accent}` : '3px solid transparent',
                           padding:     '18px 22px',
                           cursor:      loadingId ? 'wait' : 'pointer',
@@ -680,18 +685,20 @@ export default function DashboardClient({
 
               {/* XP card */}
               <div className="glc-fade" style={{
-                background: C.surface, border: `1px solid ${C.border}`,
+                background: `linear-gradient(180deg, #110507 0%, ${C.surface} 60%)`,
+                border: `1px solid ${C.border}`,
+                borderTop: `2px solid ${C.accent}`,
                 padding: '24px',
                 animationDelay: '0.15s',
               }}>
-                <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.25em', color: C.muted, textTransform: 'uppercase' as const, marginBottom: 16 }}>
+                <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.25em', color: C.accent, textTransform: 'uppercase' as const, marginBottom: 16 }}>
                   Progression XP
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
-                  <span style={{ ...M, fontSize: '36px', fontWeight: 700, color: C.accent, lineHeight: 1 }}>
+                  <span style={{ ...D, fontSize: '44px', fontWeight: 900, color: C.accent, lineHeight: 1 }}>
                     <AnimatedCounter to={localXP} />
                   </span>
-                  <span style={{ ...M, fontSize: '12px', color: C.muted }}>XP</span>
+                  <span style={{ ...D, fontSize: '14px', fontWeight: 700, color: C.muted, letterSpacing: '0.12em' }}>pts</span>
                 </div>
                 <div style={{ ...D, fontWeight: 700, fontSize: '11px', letterSpacing: '0.12em', color: C.muted, textTransform: 'uppercase' as const, marginBottom: 16 }}>
                   {level.name}
@@ -868,8 +875,10 @@ export default function DashboardClient({
           <div className="glc-fade" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            borderTop: `1px solid ${C.border}`,
-            borderBottom: `1px solid ${C.border}`,
+            background: C.surface,
+            border: `1px solid ${C.border}`,
+            overflow: 'hidden',
+            marginBottom: 40,
             animationDelay: '0.35s',
           }}>
             {[
@@ -880,16 +889,16 @@ export default function DashboardClient({
             ].map((stat, i, arr) => (
               <div key={stat.label} style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                padding: isMobile ? '14px 8px' : '16px 12px',
+                padding: isMobile ? '18px 8px' : '22px 12px',
                 borderRight: i < arr.length - 1 ? `1px solid ${C.border}` : 'none',
               }}>
-                <span style={{ ...D, fontWeight: 900, fontSize: isMobile ? '22px' : '26px', color: stat.color, lineHeight: 1 }}>
+                <span style={{ ...D, fontWeight: 900, fontSize: isMobile ? '28px' : '32px', color: stat.color, lineHeight: 1 }}>
                   {stat.mono
                     ? (typeof stat.value === 'number' ? <AnimatedCounter to={stat.value} /> : stat.value)
                     : (typeof stat.value === 'number' ? `#${stat.value}` : stat.value)
                   }
                 </span>
-                <span style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.2em', color: C.muted, textTransform: 'uppercase' as const, marginTop: 4 }}>
+                <span style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.2em', color: C.muted, textTransform: 'uppercase' as const, marginTop: 5 }}>
                   {stat.label}
                 </span>
               </div>
@@ -899,6 +908,9 @@ export default function DashboardClient({
           {/* ── Leaderboard ─────────────────────────────────────────────────── */}
           {leaderboard.length > 0 && (
             <div className="glc-fade" style={{ animationDelay: '0.4s' }}>
+              <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.3em', color: C.accent, textTransform: 'uppercase' as const, marginBottom: 8 }}>
+                Membres actifs
+              </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 16 }}>
                 <h2 style={{ ...D, fontWeight: 900, fontSize: '20px', letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: C.text, margin: 0 }}>
                   Classement
