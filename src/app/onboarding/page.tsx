@@ -698,11 +698,11 @@ function QSection7({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: stri
         rows={5}
         placeholder="Libre à toi…"
       />
-      <div className="rounded-xl border border-[#1E1E1E] bg-[#0F0F0F] p-5">
-        <p className="text-sm text-[#484848] leading-relaxed italic">
-          "Merci d'avoir pris le temps de remplir ce questionnaire. Ce que tu viens d'écrire, c'est déjà un acte de lucidité sur toi-même. La transformation commence ici."
+      <div className="rounded-xl border border-[#1E1E1E] bg-[#0F0F0F] p-5 space-y-3">
+        <p className="text-sm text-[#888888] leading-relaxed">
+          Merci d'avoir pris le temps de remplir ce questionnaire. Ce que tu viens d'écrire, c'est déjà un acte de lucidité sur toi-même. La transformation commence ici.
         </p>
-        <p className="mt-3 text-xs text-[#8B1A1A] font-medium">— Robin, Gentleman Létal Club</p>
+        <p className="text-sm text-[#8B1A1A] font-medium">— Robin</p>
       </div>
     </div>
   )
@@ -796,6 +796,7 @@ function Step5Call({
         </div>
       ) : (
         <div className="rounded-xl border border-[#8B1A1A]/30 bg-[#8B1A1A]/5 p-6 text-center space-y-4">
+          <div className="text-6xl">📞</div>
           <p className="text-[#F5F5F5] text-sm font-medium">Tu y es. Robin t'attend.</p>
           <p className="text-[#484848] text-sm leading-relaxed">
             Choisis le créneau qui te convient. Ce call de démarrage est le point de lancement de ta transformation.
@@ -851,8 +852,7 @@ function QSectionTitle({ title }: { icon?: string; title: string }) {
   return (
     <div className="pb-1 border-b border-[#1E1E1E]">
       <span
-        className="text-sm font-black uppercase text-[#888888]"
-        style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '0.08em' }}
+        className="text-base font-bold uppercase text-[#888888] tracking-wider"
       >{title}</span>
     </div>
   )
