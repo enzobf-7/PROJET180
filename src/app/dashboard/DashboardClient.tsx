@@ -3,7 +3,8 @@
 import { useState, useEffect, useTransition, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { toggleHabitAction, getXpDelta } from './actions'
+import { toggleHabitAction } from './actions'
+import { getXpDelta } from './utils'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
