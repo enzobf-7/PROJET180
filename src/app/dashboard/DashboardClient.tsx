@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { toggleHabitAction } from './actions'
+import { toggleHabitAction, getXpDelta } from './actions'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -22,7 +22,6 @@ const C = {
 }
 const D = { fontFamily: '"Barlow Condensed", sans-serif' } as const
 const M = { fontFamily: '"JetBrains Mono", monospace' }    as const
-const XP_PER_HABIT = 10
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Habit { id: string; name: string }
@@ -44,8 +43,9 @@ interface Props {
   leaderboard:       LeaderboardEntry[]
   onboardingDate:    string | null
   whatsappLink:      string | null
+  weeklyXP:          number
 }
-interface XPParticle { id: number; delta: number }
+interface XPParticle { id: number; delta: number; multiplier: number }
 
 // ─── Level system ─────────────────────────────────────────────────────────────
 const LEVELS = [
@@ -134,13 +134,15 @@ function AnimatedCounter({ to, duration = 1200 }: { to: number; duration?: numbe
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function DashboardClient({
   jourX, firstName, gamification, habits, completedHabitIds, responses,
-  leaderboard, onboardingDate, whatsappLink,
+  leaderboard, onboardingDate, whatsappLink, weeklyXP,
 }: Props) {
   const router = useRouter()
   const [, startTransition] = useTransition()
   const [completed, setCompleted] = useState<Set<string>>(new Set(completedHabitIds))
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [localXP, setLocalXP] = useState(gamification.xp_total)
+  const [localStreak, setLocalStreak] = useState(gamification.current_streak)
+  const [levelUpOverlay, setLevelUpOverlay] = useState<string | null>(null)
   const [particles, setParticles] = useState<XPParticle[]>([])
   const particleId = useRef(0)
   const [celebrateRing, setCelebrateRing] = useState(false)
@@ -158,27 +160,45 @@ export default function DashboardClient({
   const handleToggle = (habitId: string) => {
     if (loadingId) return
     const wasCompleted = completed.has(habitId)
-    const delta = wasCompleted ? -XP_PER_HABIT : +XP_PER_HABIT
+    // Optimistic estimate (multiplier-aware, uses current localStreak)
+    const optimisticDelta = wasCompleted ? -10 : getXpDelta(localStreak)
     setCompleted(prev => {
       const next = new Set(prev)
       wasCompleted ? next.delete(habitId) : next.add(habitId)
       return next
     })
-    setLocalXP(prev => Math.max(0, prev + delta))
+    setLocalXP(prev => Math.max(0, prev + optimisticDelta))
     const pid = ++particleId.current
-    setParticles(p => [...p, { id: pid, delta }])
+    setParticles(p => [...p, { id: pid, delta: optimisticDelta, multiplier: 1 }])
     setTimeout(() => setParticles(p => p.filter(x => x.id !== pid)), 1500)
     setLoadingId(habitId)
     startTransition(async () => {
       try {
-        await toggleHabitAction(habitId, !wasCompleted)
+        const result = await toggleHabitAction(habitId, !wasCompleted, habits.length)
+        if (result) {
+          // Reconcile with server truth
+          setLocalXP(result.newXP)
+          setLocalStreak(result.newStreak)
+          // Swap optimistic particle for accurate one (with real delta + multiplier)
+          const accuratePid = ++particleId.current
+          setParticles(p => [
+            ...p.filter(x => x.id !== pid),
+            { id: accuratePid, delta: result.xpDelta, multiplier: result.multiplier },
+          ])
+          setTimeout(() => setParticles(p => p.filter(x => x.id !== accuratePid)), 1500)
+          if (result.leveledUp) {
+            setLevelUpOverlay(result.newLevel)
+            setTimeout(() => setLevelUpOverlay(null), 2800)
+          }
+        }
       } catch {
+        // Rollback on error
         setCompleted(prev => {
           const next = new Set(prev)
           wasCompleted ? next.add(habitId) : next.delete(habitId)
           return next
         })
-        setLocalXP(prev => Math.max(0, prev - delta))
+        setLocalXP(prev => Math.max(0, prev - optimisticDelta))
       } finally {
         setLoadingId(null)
       }
@@ -192,11 +212,11 @@ export default function DashboardClient({
   const allDone        = totalHabits > 0 && completedCount === totalHabits
   const daysPct        = Math.round((jourX / 180) * 100)
   const daysLeft       = 180 - jourX
-  const xp             = gamification.xp_total
+  const xp             = localXP
   const level          = getCurrentLevel(xp)
   const levelPct       = getLevelProgress(xp)
   const nextLevel      = getNextLevel(xp)
-  const streak         = gamification.current_streak
+  const streak         = localStreak
   const record         = gamification.longest_streak
   const hotStreak      = streak >= 7
   const legendStreak   = streak >= 30
@@ -204,6 +224,19 @@ export default function DashboardClient({
   const maxXP          = leaderboard[0]?.xp || 1
   const visionText     = (responses?.vision as string) ?? null
   const objectifText   = (responses?.objectif_principal as string) ?? null
+
+  // ── Badges (computed from existing data, no DB table) ──────────────────────
+  const BADGES: { key: string; label: string; icon: string; earned: boolean; desc: string }[] = [
+    { key: 'first_step',   label: 'Premier pas',      icon: '⚡', earned: xp >= 10,                           desc: 'Premier XP gagné' },
+    { key: 'week_fire',    label: 'Semaine de feu',    icon: '🔥', earned: streak >= 7,                        desc: '7 jours de série' },
+    { key: 'fortnight',    label: 'Quinzaine',         icon: '⚔',  earned: streak >= 14,                       desc: '14 jours de série' },
+    { key: 'month_king',   label: 'Mois entier',       icon: '👑', earned: record >= 30,                       desc: '30 jours de série' },
+    { key: 'soldier',      label: 'Soldat',            icon: '🛡',  earned: xp >= 500,                          desc: '500 XP cumulés' },
+    { key: 'warrior',      label: 'Guerrier',          icon: '⚔',  earned: xp >= 1500,                         desc: '1 500 XP cumulés' },
+    { key: 'fighter',      label: 'Combattant',        icon: '💎', earned: xp >= 3000,                         desc: '3 000 XP cumulés' },
+    { key: 'honor',        label: "Homme d'honneur",   icon: '🏆', earned: xp >= 6000,                         desc: '6 000 XP cumulés' },
+  ]
+  const earnedCount = BADGES.filter(b => b.earned).length
 
   const navItems = [
     { label: 'Dashboard',  href: '/dashboard',  active: true  },
@@ -282,6 +315,26 @@ export default function DashboardClient({
           100% { transform: scale(1); }
         }
         .glc-habit-row:hover { background: rgba(139,26,26,0.06) !important; }
+        @keyframes glc-levelup-bg {
+          0%   { opacity: 0; }
+          15%  { opacity: 1; }
+          80%  { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        @keyframes glc-levelup-card {
+          0%   { opacity: 0; transform: scale(0.72) translateY(24px); }
+          25%  { opacity: 1; transform: scale(1.04) translateY(-4px); }
+          45%  { transform: scale(0.98) translateY(0); }
+          60%  { transform: scale(1) translateY(0); }
+          80%  { opacity: 1; transform: scale(1) translateY(0); }
+          100% { opacity: 0; transform: scale(1.06) translateY(-12px); }
+        }
+        @keyframes glc-levelup-line {
+          0%   { width: 0; opacity: 0; }
+          40%  { width: 60px; opacity: 1; }
+          80%  { width: 60px; opacity: 1; }
+          100% { width: 0; opacity: 0; }
+        }
       `}</style>
 
       {/* ── XP Particles overlay ─────────────────────────────────────────────── */}
@@ -296,10 +349,31 @@ export default function DashboardClient({
             letterSpacing: '0.05em',
             textShadow: p.delta > 0 ? `0 0 12px ${C.greenL}60` : '0 0 12px #f9737360',
           }}>
-            {p.delta > 0 ? `+${p.delta}` : p.delta} XP
+            {p.delta > 0 ? `+${p.delta}` : p.delta} XP{p.multiplier > 1 ? ` ×${p.multiplier}` : ''}
           </div>
         ))}
       </div>
+
+      {/* ── Level-up Overlay ─────────────────────────────────────────────────── */}
+      {levelUpOverlay && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 1000,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(6,6,6,0.92)',
+          animation: 'glc-levelup-bg 2.8s ease both',
+          pointerEvents: 'none',
+        }}>
+          <div style={{ textAlign: 'center', animation: 'glc-levelup-card 2.8s cubic-bezier(0.34,1.56,0.64,1) both' }}>
+            <div style={{ ...M, fontSize: '11px', letterSpacing: '0.2em', color: C.gold, marginBottom: 12, textTransform: 'uppercase' as const }}>
+              Niveau supérieur
+            </div>
+            <div style={{ ...D, fontSize: '52px', fontWeight: 800, color: C.text, letterSpacing: '0.02em', lineHeight: 1 }}>
+              {levelUpOverlay}
+            </div>
+            <div style={{ height: 2, background: C.accent, margin: '20px auto 0', borderRadius: 1, animation: 'glc-levelup-line 2.8s ease both' }} />
+          </div>
+        </div>
+      )}
 
       {/* ── Sidebar ─────────────────────────────────────────────────────────── */}
       {!isMobile && <aside style={{
@@ -582,26 +656,27 @@ export default function DashboardClient({
 
           {/* Stats strip */}
           <div className="glc-fade" style={{
-            display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+            display: 'grid', gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(5, 1fr)',
             background: C.surface,
             border: `1px solid ${C.border}`,
             marginBottom: 36,
           }}>
             {[
-              { label: 'XP Total',   val: <AnimatedCounter to={localXP} />,               unit: 'pts',                            color: C.accent },
-              { label: 'Série',      val: hotStreak ? `🔥 ${streak}` : streak,             unit: streak !== 1 ? 'jours' : 'jour',  color: hotStreak ? C.gold : C.text },
-              { label: 'Record',     val: record,                                           unit: record !== 1 ? 'jours' : 'jour',  color: C.text   },
-              { label: 'Classement', val: myRank ? `#${myRank}` : '—',                     unit: `/ ${leaderboard.length || '—'}`, color: myRank && myRank <= 3 ? C.gold : C.text },
-            ].map((stat, i) => (
-              <div key={i} style={{ padding: '20px 24px', borderRight: i < 3 ? `1px solid ${C.border}` : 'none', borderTop: i === 0 ? `2px solid ${C.accent}` : '2px solid transparent' }}>
+              { label: 'XP Total',    val: <AnimatedCounter to={localXP} />,               unit: 'pts',                            color: C.accent },
+              { label: 'XP Semaine',  val: <AnimatedCounter to={weeklyXP} />,               unit: 'pts',                            color: C.gold   },
+              { label: 'Série',       val: hotStreak ? `🔥 ${streak}` : streak,             unit: streak !== 1 ? 'jours' : 'jour',  color: hotStreak ? C.gold : C.text },
+              { label: 'Record',      val: record,                                           unit: record !== 1 ? 'jours' : 'jour',  color: C.text   },
+              { label: 'Classement',  val: myRank ? `#${myRank}` : '—',                     unit: `/ ${leaderboard.length || '—'}`, color: myRank && myRank <= 3 ? C.gold : C.text },
+            ].map((stat, i, arr) => (
+              <div key={i} style={{ padding: '20px 18px', borderRight: i < arr.length - 1 ? `1px solid ${C.border}` : 'none', borderTop: i === 0 ? `2px solid ${C.accent}` : '2px solid transparent' }}>
                 <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.25em', color: C.muted, textTransform: 'uppercase' as const, marginBottom: 8 }}>
                   {stat.label}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
-                  <span style={{ ...M, fontSize: '32px', fontWeight: 700, color: stat.color, lineHeight: 1 }}>
+                  <span style={{ ...M, fontSize: '28px', fontWeight: 700, color: stat.color, lineHeight: 1 }}>
                     {stat.val}
                   </span>
-                  <span style={{ ...M, fontSize: '11px', color: C.muted }}>{stat.unit}</span>
+                  <span style={{ ...M, fontSize: '10px', color: C.muted }}>{stat.unit}</span>
                 </div>
               </div>
             ))}
@@ -790,6 +865,43 @@ export default function DashboardClient({
                       </div>
                     )
                   })}
+                </div>
+              </div>
+
+              {/* Badges card */}
+              <div className="glc-fade" style={{
+                background: C.surface, border: `1px solid ${C.border}`,
+                padding: '20px 24px',
+                animationDelay: '0.22s',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.25em', color: C.muted, textTransform: 'uppercase' as const }}>
+                    Badges
+                  </div>
+                  <div style={{ ...M, fontSize: '9px', color: C.muted }}>
+                    {earnedCount} / {BADGES.length}
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                  {BADGES.map(badge => (
+                    <div key={badge.key} title={`${badge.label} — ${badge.desc}`} style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+                      padding: '10px 4px',
+                      background: badge.earned ? `${C.accent}18` : C.bg,
+                      border: `1px solid ${badge.earned ? C.accent + '40' : C.border}`,
+                      borderRadius: 6,
+                      opacity: badge.earned ? 1 : 0.3,
+                      transition: 'opacity 0.3s',
+                      cursor: 'default',
+                    }}>
+                      <span style={{ fontSize: '18px', lineHeight: 1, filter: badge.earned ? 'none' : 'grayscale(1)' }}>
+                        {badge.icon}
+                      </span>
+                      <span style={{ ...M, fontSize: '7px', color: badge.earned ? C.text : C.muted, textAlign: 'center', lineHeight: 1.3, letterSpacing: '0.04em' }}>
+                        {badge.label}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
 

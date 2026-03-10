@@ -11,7 +11,7 @@ const C = {
   surface: '#0F0F0F',
   sidebar: '#060606',
   border:  '#1E1E1E',
-  muted:   '#484848',
+  muted:   '#888888',
   dimmed:  '#1E1E1E',
   text:    '#F2F2F5',
   accent:  '#8B1A1A',

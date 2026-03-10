@@ -7,14 +7,10 @@ import GlcLogo from '@/components/GlcLogo'
 import { GlcInput } from '@/components/GlcInput'
 import { GlcButton } from '@/components/GlcButton'
 
-const DEMO_LOGIN_ENABLED =
-  process.env.NEXT_PUBLIC_SEED_TEST_USER === 'true'
-
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [demoLoading, setDemoLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
 
@@ -33,34 +29,6 @@ export default function LoginPage() {
     }
 
     router.refresh()
-  }
-
-  const handleDemoLogin = async () => {
-    setDemoLoading(true)
-    setError('')
-
-    try {
-      const res = await fetch('/api/dev/create-test-user', { method: 'POST' })
-      if (!res.ok) throw new Error('failed')
-
-      const { email: demoEmail, password: demoPassword } = await res.json()
-      const supabase = createClient()
-      const { error } = await supabase.auth.signInWithPassword({
-        email: demoEmail,
-        password: demoPassword,
-      })
-
-      if (error) {
-        setError(`Impossible de connecter l'utilisateur de démo.`)
-        return
-      }
-
-      router.refresh()
-    } catch {
-      setError(`Impossible de créer l'utilisateur de démo.`)
-    } finally {
-      setDemoLoading(false)
-    }
   }
 
   return (
@@ -115,25 +83,11 @@ export default function LoginPage() {
             <GlcButton
               type="submit"
               loading={loading}
-              disabled={demoLoading}
               fullWidth
               className="mt-1"
             >
               {loading ? 'Connexion...' : 'Se connecter'}
             </GlcButton>
-
-            {DEMO_LOGIN_ENABLED && (
-              <GlcButton
-                type="button"
-                variant="ghost"
-                onClick={handleDemoLogin}
-                loading={demoLoading}
-                disabled={loading}
-                fullWidth
-              >
-                {demoLoading ? 'Connexion de démo…' : 'Connexion de démo (auto)'}
-              </GlcButton>
-            )}
           </form>
         </div>
 

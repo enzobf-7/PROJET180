@@ -10,6 +10,7 @@ export default async function DashboardPage() {
 
   const admin = createAdminClient()
   const today = new Date().toISOString().split('T')[0]
+  const weekStart = new Date(Date.now() - 6 * 86400000).toISOString().split('T')[0]
 
   const [
     { data: onboarding },
@@ -19,6 +20,7 @@ export default async function DashboardPage() {
     { data: habitLogs },
     { data: allGamification },
     { data: settings },
+    { count: weeklyLogsCount },
   ] = await Promise.all([
     admin.from('onboarding_progress').select('completed_at').eq('user_id', user.id).single(),
     admin.from('questionnaire_responses').select('responses').eq('client_id', user.id).single(),
@@ -27,7 +29,11 @@ export default async function DashboardPage() {
     admin.from('habit_logs').select('habit_id, completed').eq('client_id', user.id).eq('date', today),
     admin.from('gamification').select('client_id, xp_total, current_streak').order('xp_total', { ascending: false }).limit(100),
     admin.from('app_settings').select('whatsapp_link').eq('id', 1).single(),
+    admin.from('habit_logs').select('id', { count: 'exact', head: true }).eq('client_id', user.id).eq('completed', true).gte('date', weekStart).lte('date', today),
   ])
+
+  // Weekly XP = nb habits completed this week × base 10 XP (approx — multipliers not stored per-log)
+  const weeklyXP = (weeklyLogsCount ?? 0) * 10
 
   // Jour X / 180
   let jourX = 1
@@ -93,6 +99,7 @@ export default async function DashboardPage() {
       leaderboard={leaderboard}
       onboardingDate={onboarding?.completed_at ?? null}
       whatsappLink={(settings as { whatsapp_link: string | null } | null)?.whatsapp_link ?? null}
+      weeklyXP={weeklyXP}
     />
   )
 }

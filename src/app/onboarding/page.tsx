@@ -208,7 +208,7 @@ export default function OnboardingPage() {
           <div className="flex items-center gap-3">
             <GlcLogo size="sm" />
             <span className="text-[#1E1E1E]">|</span>
-            <span className="text-[#484848] text-xs uppercase tracking-widest">Onboarding</span>
+            <span className="text-[#F2F2F5] text-sm font-black uppercase tracking-widest">Onboarding</span>
           </div>
           <span className="text-[#484848] text-xs">{currentStep}/5</span>
         </div>
@@ -384,7 +384,7 @@ function Step1Contract({
   loading: boolean
   done: boolean
 }) {
-  if (done) return <StepDone label="Contrat signé ✓" onContinue={() => {}} />
+  if (done) return <StepDone label="Contrat signé" onContinue={() => {}} />
 
   return (
     <div className="space-y-6">
@@ -462,7 +462,7 @@ function Step2Questionnaire({
   loading: boolean
   done: boolean
 }) {
-  if (done) return <StepDone label="Questionnaire complété ✓" onContinue={() => {}} />
+  if (done) return <StepDone label="Questionnaire complété" onContinue={() => {}} />
 
   const totalSections = 7
 
@@ -546,6 +546,13 @@ function QSection1({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: stri
         onChange={v => setQ('income', v)}
         options={['< 1 000€', '1 000€–3 000€', '3 000€–5 000€', '5 000€–10 000€', '10 000€+']}
       />
+      <QSelect
+        label="Comment tu nous as découverts ?"
+        value={q.how_found}
+        onChange={v => setQ('how_found', v)}
+        options={['YouTube', 'Instagram', 'Substack', 'Bouche-à-oreille', 'Autre']}
+      />
+      <QTextarea label="Pourquoi nous avoir choisi nous ?" value={q.why_us} onChange={v => setQ('why_us', v)} />
     </div>
   )
 }
@@ -660,7 +667,7 @@ function Step3Link({
   done: boolean
   onConfirm: () => void
 }) {
-  if (done) return <StepDone label={`${title.split(' ')[2] || title} ✓`} onContinue={() => {}} />
+  if (done) return <StepDone label={title} onContinue={() => {}} />
 
   const hasLink = !!url && url.trim() !== '' && url.trim() !== '#'
 
@@ -761,11 +768,15 @@ function StepHeader({ number, title, subtitle }: { number: string; title: string
   )
 }
 
-function StepDone({ label, onContinue }: { label: string; onContinue: () => void }) {
+function StepDone({ label }: { label: string; onContinue: () => void }) {
   return (
-    <div className="rounded-xl border border-[#22C55E]/30 bg-[#22C55E]/5 p-8 text-center space-y-3">
-      <div className="text-4xl">✅</div>
-      <p className="text-[#22C55E] font-bold">{label}</p>
+    <div className="rounded-xl border border-[#1E1E1E] bg-[#0F0F0F] p-10 text-center space-y-5">
+      <div className="mx-auto w-14 h-14 rounded-full border border-[#22C55E]/30 bg-[#22C55E]/5 flex items-center justify-center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </div>
+      <p className="text-[#F2F2F5] text-sm font-black uppercase tracking-widest">{label}</p>
     </div>
   )
 }
@@ -774,7 +785,7 @@ function QSectionTitle({ icon, title }: { icon: string; title: string }) {
   return (
     <div className="flex items-center gap-2 pb-1 border-b border-[#1E1E1E]">
       <span>{icon}</span>
-      <span className="text-xs font-black uppercase tracking-widest text-[#484848]">{title}</span>
+      <span className="text-sm font-black uppercase tracking-widest text-[#888888]">{title}</span>
     </div>
   )
 }
@@ -787,7 +798,7 @@ function QInput({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-xs font-medium text-[#484848] uppercase tracking-wider">{label}</label>
+      <label className="block text-xs font-medium text-[#888888] uppercase tracking-wider">{label}</label>
       <input
         type={type}
         value={value}
@@ -807,7 +818,7 @@ function QTextarea({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-xs font-medium text-[#484848] uppercase tracking-wider">{label}</label>
+      <label className="block text-xs font-medium text-[#888888] uppercase tracking-wider">{label}</label>
       <textarea
         value={value}
         onChange={e => onChange(e.target.value)}
@@ -826,7 +837,7 @@ function QSelect({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-xs font-medium text-[#484848] uppercase tracking-wider">{label}</label>
+      <label className="block text-xs font-medium text-[#888888] uppercase tracking-wider">{label}</label>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
@@ -847,7 +858,7 @@ function QSlider({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-medium text-[#484848] uppercase tracking-wider">{label}</label>
+        <label className="text-xs font-medium text-[#888888] uppercase tracking-wider">{label}</label>
         <span className="text-lg font-black text-[#8B1A1A]">{value}/10</span>
       </div>
       <input
