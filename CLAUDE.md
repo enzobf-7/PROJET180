@@ -103,14 +103,16 @@ Tous les crons vérifient `Authorization: Bearer <CRON_SECRET>`.
 - `client` : accès `/dashboard`, `/profil`, `/programme`, `/onboarding`
 - Défini dans `profiles.role`, vérifié dans `src/middleware.ts`
 
-## Migration DB requise avant déploiement
-Exécuter dans Supabase SQL Editor :
+## Migrations DB requises avant déploiement
+Exécuter dans Supabase SQL Editor (dans cet ordre) :
 ```
 supabase/migrations/20260309_milestone_emails_sent.sql
+supabase/migrations/20260310_contract_signature.sql
 ```
 
 ## Go-live checklist
 - [ ] Migration `milestone_emails_sent` exécutée dans Supabase
+- [ ] Migration `contract_signature` exécutée dans Supabase
 - [ ] Variables d'env configurées dans Vercel (voir liste ci-dessus)
 - [ ] Stripe webhook URL configurée : `https://app.gentlemanletal.club/api/webhooks/stripe`
 - [ ] Robin a entré ses 4 liens dans `/admin` (WhatsApp, Skool, iClosed, contrat PDF)

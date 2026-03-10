@@ -544,6 +544,7 @@ export default function ProfilClient({ jourX, email, responses, gamification, on
                 const xp         = typeof stats.xp_total === 'number' ? stats.xp_total : null
                 const streak     = typeof stats.streak === 'number' ? stats.streak : null
                 const motiv      = report.motivation_score
+                const aiSummary  = typeof stats.ai_summary === 'string' && stats.ai_summary.trim() ? stats.ai_summary.trim() : null
                 const reportDate = new Date(report.submitted_at)
                 const weekLabel  = `Semaine ${report.week_number}`
                 const dateLabel  = fmt(reportDate)
@@ -611,6 +612,18 @@ export default function ProfilClient({ jourX, email, responses, gamification, on
                         </div>
                       ))}
                     </div>
+
+                    {/* AI summary */}
+                    {aiSummary && (
+                      <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 14 }}>
+                        <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: C.muted, marginBottom: 8 }}>
+                          Analyse Robin
+                        </div>
+                        <p style={{ ...M, fontSize: '13px', color: C.text, lineHeight: 1.7, margin: 0, fontStyle: 'italic' }}>
+                          {aiSummary}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )
               })}
