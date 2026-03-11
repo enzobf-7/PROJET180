@@ -8,7 +8,7 @@ export async function POST() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
-  const coachEmail = process.env.COACH_EMAIL || 'robin@gentlemanletal.club'
+  const coachEmail = process.env.COACH_EMAIL || 'robin@projet180.fr'
 
   // Fetch client profile + signature data
   const { data: profile } = await admin
@@ -39,7 +39,7 @@ export async function POST() {
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        sender: { name: 'Projet180', email: 'noreply@gentlemanletal.club' },
+        sender: { name: 'Projet180', email: 'noreply@projet180.fr' },
         to: [{ email: coachEmail, name: 'Robin' }],
         subject: `${clientName} vient de signer son contrat`,
         htmlContent: `

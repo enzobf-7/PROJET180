@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 const TEST_EMAIL =
-  process.env.SEED_TEST_USER_EMAIL || 'demo+glc-client@example.com'
+  process.env.SEED_TEST_USER_EMAIL || 'demo+p180-client@example.com'
 
 export async function POST() {
   if (process.env.NEXT_PUBLIC_SEED_TEST_USER !== 'true') {

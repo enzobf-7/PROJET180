@@ -111,7 +111,7 @@ function generateTempPassword(): string {
 }
 
 async function sendWelcomeEmail(email: string, firstName: string, password: string) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://glc-app.vercel.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://projet180.vercel.app'
   try {
     await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
@@ -121,7 +121,7 @@ async function sendWelcomeEmail(email: string, firstName: string, password: stri
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        sender: { name: 'Robin — Projet180', email: 'noreply@gentlemanletal.club' },
+        sender: { name: 'Robin — Projet180', email: 'noreply@projet180.fr' },
         to: [{ email, name: firstName }],
         subject: 'Bienvenue dans Projet180',
         htmlContent: `

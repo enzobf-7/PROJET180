@@ -1,6 +1,6 @@
-# GLC APP — CLAUDE.md
+# PROJET180 APP — CLAUDE.md
 
-Plateforme de coaching 180j "Gentleman Létal Club" par Robin Duplouis.
+Plateforme de coaching 180j "Projet180" par Robin Duplouis.
 
 ## Stack
 - **Next.js 16** App Router, React 19, TypeScript, Tailwind CSS 4
@@ -33,9 +33,9 @@ SUPABASE_SERVICE_ROLE_KEY=
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 BREVO_API_KEY=
-NEXT_PUBLIC_APP_URL=https://app.gentlemanletal.club
+NEXT_PUBLIC_APP_URL=https://app.projet180.fr
 CRON_SECRET=<secret aléatoire — Vercel l'envoie dans Authorization: Bearer>
-COACH_EMAIL=robin@gentlemanletal.club
+COACH_EMAIL=robin@projet180.fr
 NEXT_PUBLIC_SEED_TEST_USER=false
 ANTHROPIC_API_KEY=<clé API Anthropic — pour les weekly reports AI>
 ```
@@ -80,11 +80,25 @@ import { createAdminClient } from '@/lib/supabase/admin' // pour les routes admi
 ```
 
 ## Design system
-- **Accent**: `#8B1A1A` (bordeaux) / hover: `#A32020`
+- **Prefix CSS**: `p180-*` (ex: `p180-accent`, `p180-bg`, `p180-border`)
+- **Accent**: `#3A86FF` (bleu) / hover: `#2D6FE6`
 - **Fond OLED**: `#060606` / Surface: `#0F0F0F` / Border: `#1E1E1E`
 - **Muted**: `#484848`
 - **Fonts**: Barlow Condensed (display), JetBrains Mono (mono)
-- UI en français, pas de lib de composants (tout Tailwind custom)
+- **Composants**: P180Button, P180Input, P180Logo (tout Tailwind custom, pas de lib)
+- UI en français
+
+## Niveaux de gamification
+| Niveau | XP min | Nom |
+|--------|--------|-----|
+| 1 | 0 | L'Endormi |
+| 2 | 500 | L'Éveillé |
+| 3 | 1 500 | Le Bâtisseur |
+| 4 | 3 000 | Le Souverain |
+| 5 | 6 000 | Le Point de Bascule |
+| 6 | 12 000 | Le 180 |
+
+Source unique : `src/lib/levels.ts`
 
 ## Crons Vercel (`vercel.json`)
 | Route | Schedule | Rôle |
@@ -116,14 +130,10 @@ supabase/migrations/20260311_wins.sql
 ```
 
 ## Go-live checklist
-- [ ] Migration `milestone_emails_sent` exécutée dans Supabase
-- [ ] Migration `contract_signature` exécutée dans Supabase
-- [ ] Migration `habits_category` exécutée dans Supabase
-- [ ] Migration `todos` exécutée dans Supabase
-- [ ] Migration `wins` exécutée dans Supabase
+- [ ] Toutes les migrations exécutées dans Supabase
 - [ ] Variables d'env configurées dans Vercel (voir liste ci-dessus)
-- [ ] Stripe webhook URL configurée : `https://app.gentlemanletal.club/api/webhooks/stripe`
+- [ ] Stripe webhook URL configurée : `https://app.projet180.fr/api/webhooks/stripe`
 - [ ] Robin a entré ses 4 liens dans `/admin` (WhatsApp, Skool, iClosed, contrat PDF)
 - [ ] Compte admin Robin créé (role = 'admin' dans `profiles`)
-- [ ] Domaine `app.gentlemanletal.club` → CNAME vers `cname.vercel-dns.com`
+- [ ] Domaine configuré → CNAME vers `cname.vercel-dns.com`
 - [ ] Test E2E : paiement Stripe → email → login → onboarding → dashboard

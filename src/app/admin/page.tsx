@@ -998,7 +998,7 @@ export default function AdminPage() {
                   { key: 'whatsapp_link' as keyof AppSettingsRow, label: 'Groupe WhatsApp', placeholder: 'https://chat.whatsapp.com/...' },
                   { key: 'skool_link' as keyof AppSettingsRow, label: 'Communauté Skool', placeholder: 'https://www.skool.com/...' },
                   { key: 'iclosed_link' as keyof AppSettingsRow, label: 'Lien de call (iClosed)', placeholder: 'https://app.iclosed.io/...' },
-                  { key: 'contract_pdf_url' as keyof AppSettingsRow, label: 'Contrat PDF', placeholder: 'https://.../contrat-glc.pdf' },
+                  { key: 'contract_pdf_url' as keyof AppSettingsRow, label: 'Contrat PDF', placeholder: 'https://.../contrat-projet180.pdf' },
                 ].map(field => (
                   <div key={field.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#484848' }}>

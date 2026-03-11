@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import GlcLogo from '@/components/GlcLogo'
+import P180Logo from '@/components/P180Logo'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -46,24 +46,7 @@ interface Props {
   weeklyReports:  WeeklyReport[]
 }
 
-// ─── Level system ─────────────────────────────────────────────────────────────
-const LEVELS = [
-  { name: 'Recrue',    min: 0,     max: 500   },
-  { name: 'Aspirant',  min: 500,   max: 1500  },
-  { name: 'Disciple',  min: 1500,  max: 3000  },
-  { name: 'Initié',    min: 3000,  max: 6000  },
-  { name: 'Élite',     min: 6000,  max: 12000 },
-  { name: 'ÉLITE MAX', min: 12000, max: Infinity },
-]
-
-function getCurrentLevel(xp: number) {
-  return LEVELS.find(l => xp >= l.min && xp < l.max) ?? LEVELS[LEVELS.length - 1]
-}
-function getLevelProgress(xp: number) {
-  const lvl = getCurrentLevel(xp)
-  if (lvl.max === Infinity) return 100
-  return Math.round(((xp - lvl.min) / (lvl.max - lvl.min)) * 100)
-}
+import { LEVELS, getCurrentLevel, getLevelProgress } from '@/lib/levels'
 
 // ─── Questionnaire sections ───────────────────────────────────────────────────
 const SECTIONS = [
@@ -184,7 +167,7 @@ export default function ProfilClient({ jourX, email, responses, gamification, on
       }}>
         {/* Logo */}
         <div style={{ padding: '20px 20px 18px', borderBottom: `1px solid ${C.border}` }}>
-          <GlcLogo size="sm" showText />
+          <P180Logo size="sm" showText />
         </div>
 
         {/* Nav */}

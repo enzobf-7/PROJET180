@@ -15,18 +15,7 @@ const S = {
 const D = { fontFamily: '"Barlow Condensed", sans-serif' } as const
 const M = { fontFamily: '"JetBrains Mono", monospace' }    as const
 
-// ─── Level system ─────────────────────────────────────────────────────────────
-const LEVELS = [
-  { name: 'Recrue',    min: 0     },
-  { name: 'Aspirant',  min: 500   },
-  { name: 'Disciple',  min: 1500  },
-  { name: 'Initié',    min: 3000  },
-  { name: 'Élite',     min: 6000  },
-  { name: 'ÉLITE MAX', min: 12000 },
-]
-function getLevelName(xp: number) {
-  return [...LEVELS].reverse().find(l => xp >= l.min)?.name ?? 'Recrue'
-}
+import { getLevelName } from '@/lib/levels'
 
 // ─── Questionnaire sections ────────────────────────────────────────────────────
 const SECTIONS = [

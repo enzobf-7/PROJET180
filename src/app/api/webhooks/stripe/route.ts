@@ -70,8 +70,10 @@ export async function POST(request: NextRequest) {
     await supabase.from('programs').insert({ client_id: userId, content: [] })
     await supabase.from('gamification').insert({ client_id: userId })
     await supabase.from('todos').insert([
-      { client_id: userId, title: "J'ai coché toute ma to-do du jour", is_system: true },
-      { client_id: userId, title: "J'ai préparé ma to-do du lendemain", is_system: true },
+      { client_id: userId, title: 'Poster check-in du soir dans le groupe', is_system: true },
+      { client_id: userId, title: 'To-do du lendemain', is_system: true },
+      { client_id: userId, title: 'Le dimanche : poster wins de la semaine', is_system: true },
+      { client_id: userId, title: 'Être présent au live', is_system: true },
     ])
 
     await sendWelcomeEmail(email, firstName, tempPassword)
@@ -92,7 +94,7 @@ function generateTempPassword(): string {
 }
 
 async function sendWelcomeEmail(email: string, firstName: string, password: string) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://glc-app.vercel.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://projet180.vercel.app'
 
   try {
     await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -103,7 +105,7 @@ async function sendWelcomeEmail(email: string, firstName: string, password: stri
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        sender: { name: 'Robin — Projet180', email: 'noreply@gentlemanletal.club' },
+        sender: { name: 'Robin — Projet180', email: 'noreply@projet180.fr' },
         to: [{ email, name: firstName }],
         subject: 'Bienvenue dans Projet180',
         htmlContent: `

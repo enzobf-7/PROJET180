@@ -2,7 +2,7 @@
 
 import { ButtonHTMLAttributes, forwardRef } from 'react'
 
-interface GlcButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface P180ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'ghost' | 'danger'
   size?: 'sm' | 'md' | 'lg'
   loading?: boolean
@@ -11,11 +11,11 @@ interface GlcButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const VARIANTS = {
   primary:
-    'bg-glc-accent hover:bg-glc-accent-hover text-white font-semibold hover:shadow-[0_0_24px_rgba(139,26,26,0.45)] active:scale-[0.98]',
+    'bg-p180-accent hover:bg-p180-accent-hover text-white font-semibold hover:shadow-[0_0_24px_rgba(58,134,255,0.45)] active:scale-[0.98]',
   ghost:
-    'border border-glc-border text-glc-muted hover:border-glc-accent/60 hover:text-glc-text bg-transparent',
+    'border border-p180-border text-p180-muted hover:border-p180-accent/60 hover:text-p180-text bg-transparent',
   danger:
-    'bg-[rgba(139,26,26,0.15)] border border-[rgba(139,26,26,0.35)] text-[#ff6b6b] hover:bg-[rgba(139,26,26,0.25)]',
+    'bg-[rgba(239,68,68,0.15)] border border-[rgba(239,68,68,0.35)] text-[#ff6b6b] hover:bg-[rgba(239,68,68,0.25)]',
 }
 
 const SIZES = {
@@ -24,8 +24,8 @@ const SIZES = {
   lg: 'py-3.5 px-6 text-sm rounded-xl',
 }
 
-export const GlcButton = forwardRef<HTMLButtonElement, GlcButtonProps>(
-  function GlcButton(
+export const P180Button = forwardRef<HTMLButtonElement, P180ButtonProps>(
+  function P180Button(
     {
       variant = 'primary',
       size = 'lg',

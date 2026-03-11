@@ -2,16 +2,16 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-glc-bg: #060606;
-  --color-glc-card: #0F0F0F;
-  --color-glc-border: #1E1E1E;
-  --color-glc-text: #F5F5F5;
-  --color-glc-muted: #484848;
-  --color-glc-accent: #3A86FF;
-  --color-glc-accent-hover: #2B75EE;
-  --color-glc-success: #22C55E;
-  --color-glc-warning: #EAB308;
-  --color-glc-danger: #EF4444;
+  --color-p180-bg: #060606;
+  --color-p180-card: #0F0F0F;
+  --color-p180-border: #1E1E1E;
+  --color-p180-text: #F5F5F5;
+  --color-p180-muted: #484848;
+  --color-p180-accent: #3A86FF;
+  --color-p180-accent-hover: #2B75EE;
+  --color-p180-success: #22C55E;
+  --color-p180-warning: #EAB308;
+  --color-p180-danger: #EF4444;
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -20,23 +20,23 @@
 * { box-sizing: border-box; }
 
 body {
-  background: var(--color-glc-bg);
-  color: var(--color-glc-text);
+  background: var(--color-p180-bg);
+  color: var(--color-p180-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--color-glc-bg); }
-::-webkit-scrollbar-thumb { background: var(--color-glc-border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-glc-muted); }
+::-webkit-scrollbar-track { background: var(--color-p180-bg); }
+::-webkit-scrollbar-thumb { background: var(--color-p180-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-p180-muted); }
 
-::selection { background: var(--color-glc-accent); color: white; }
-:focus-visible { outline: 2px solid var(--color-glc-accent); outline-offset: 2px; }
+::selection { background: var(--color-p180-accent); color: white; }
+:focus-visible { outline: 2px solid var(--color-p180-accent); outline-offset: 2px; }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes slideUp {
@@ -52,7 +52,7 @@ body {
   50% { box-shadow: 0 0 20px 4px rgba(58, 134, 255, 0.15); }
 }
 
-.animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+.animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
 .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
 .animate-slide-in-left { opacity: 0; animation: slideInLeft 0.35s ease-out forwards; }
 .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }

@@ -47,32 +47,9 @@ interface Props {
 }
 interface XPParticle { id: number; delta: number; multiplier: number }
 
-// ─── Level system ─────────────────────────────────────────────────────────────
-const LEVELS = [
-  { name: 'Recrue',    min: 0,     max: 500   },
-  { name: 'Aspirant',  min: 500,   max: 1500  },
-  { name: 'Disciple',  min: 1500,  max: 3000  },
-  { name: 'Initié',    min: 3000,  max: 6000  },
-  { name: 'Élite',     min: 6000,  max: 12000 },
-  { name: 'ÉLITE MAX', min: 12000, max: Infinity },
-]
+import { LEVELS, getCurrentLevel, getLevelProgress, getNextLevel } from '@/lib/levels'
 
 const STREAK_MILESTONES = [7, 14, 21, 30, 60, 90]
-
-function getCurrentLevel(xp: number) {
-  return LEVELS.find(l => xp >= l.min && xp < l.max) ?? LEVELS[LEVELS.length - 1]
-}
-function getLevelProgress(xp: number) {
-  const lvl = getCurrentLevel(xp)
-  if (lvl.max === Infinity) return 100
-  return Math.round(((xp - lvl.min) / (lvl.max - lvl.min)) * 100)
-}
-function getNextLevel(xp: number) {
-  const lvl = getCurrentLevel(xp)
-  if (lvl.max === Infinity) return null
-  const idx = LEVELS.indexOf(lvl)
-  return { name: LEVELS[idx + 1]?.name ?? '', xpNeeded: lvl.max - xp }
-}
 
 // ─── useCountdown ─────────────────────────────────────────────────────────────
 function useCountdown(startDate: string | null) {
@@ -355,49 +332,49 @@ export default function DashboardClient({
 
       {/* ── CSS Animations ──────────────────────────────────────────────────── */}
       <style>{`
-        @keyframes glc-fade {
+        @keyframes p180-fade {
           from { opacity: 0; transform: translateY(8px); }
           to   { opacity: 1; transform: translateY(0);   }
         }
-        @keyframes glc-slide {
+        @keyframes p180-slide {
           from { opacity: 0; transform: translateX(-12px); }
           to   { opacity: 1; transform: translateX(0);      }
         }
-        @keyframes glc-ping {
+        @keyframes p180-ping {
           0%, 100% { transform: scale(1);   opacity: 1;   }
           50%      { transform: scale(1.6); opacity: 0.35; }
         }
-        .glc-fade      { animation: glc-fade      0.45s cubic-bezier(0.2,0,0.1,1) both; }
-        .glc-slide     { animation: glc-slide     0.4s  cubic-bezier(0.2,0,0.1,1) both; }
-        .glc-ping      { animation: glc-ping      1.8s  ease-in-out infinite; }
-        @keyframes glc-xp-rise {
+        .p180-fade      { animation: p180-fade      0.45s cubic-bezier(0.2,0,0.1,1) both; }
+        .p180-slide     { animation: p180-slide     0.4s  cubic-bezier(0.2,0,0.1,1) both; }
+        .p180-ping      { animation: p180-ping      1.8s  ease-in-out infinite; }
+        @keyframes p180-xp-rise {
           0%   { opacity: 0; transform: translateY(0) scale(0.8); }
           15%  { opacity: 1; transform: translateY(-4px) scale(1.15); }
           70%  { opacity: 1; transform: translateY(-36px) scale(1); }
           100% { opacity: 0; transform: translateY(-60px) scale(0.9); }
         }
-        @keyframes glc-ring-done {
+        @keyframes p180-ring-done {
           0%   { transform: scale(1); }
           30%  { transform: scale(1.18); }
           60%  { transform: scale(0.94); }
           100% { transform: scale(1); }
         }
-        .glc-xp-rise   { animation: glc-xp-rise   1.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
-        .glc-ring-done { animation: glc-ring-done  0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
-        @keyframes glc-habit-check {
+        .p180-xp-rise   { animation: p180-xp-rise   1.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
+        .p180-ring-done { animation: p180-ring-done  0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+        @keyframes p180-habit-check {
           0%   { transform: scale(1); }
           40%  { transform: scale(1.22); }
           70%  { transform: scale(0.92); }
           100% { transform: scale(1); }
         }
-        .glc-habit-row:hover { background: rgba(58,134,255,0.06) !important; }
-        @keyframes glc-levelup-bg {
+        .p180-habit-row:hover { background: rgba(58,134,255,0.06) !important; }
+        @keyframes p180-levelup-bg {
           0%   { opacity: 0; }
           15%  { opacity: 1; }
           80%  { opacity: 1; }
           100% { opacity: 0; }
         }
-        @keyframes glc-levelup-card {
+        @keyframes p180-levelup-card {
           0%   { opacity: 0; transform: scale(0.72) translateY(24px); }
           25%  { opacity: 1; transform: scale(1.04) translateY(-4px); }
           45%  { transform: scale(0.98) translateY(0); }
@@ -405,7 +382,7 @@ export default function DashboardClient({
           80%  { opacity: 1; transform: scale(1) translateY(0); }
           100% { opacity: 0; transform: scale(1.06) translateY(-12px); }
         }
-        @keyframes glc-levelup-line {
+        @keyframes p180-levelup-line {
           0%   { width: 0; opacity: 0; }
           40%  { width: 60px; opacity: 1; }
           80%  { width: 60px; opacity: 1; }
@@ -416,7 +393,7 @@ export default function DashboardClient({
       {/* ── XP Particles overlay ─────────────────────────────────────────────── */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 999 }}>
         {particles.map(p => (
-          <div key={p.id} className="glc-xp-rise" style={{
+          <div key={p.id} className="p180-xp-rise" style={{
             position: 'absolute',
             right: isMobile ? '24px' : '48px',
             top:   isMobile ? '80px' : '160px',
@@ -436,17 +413,17 @@ export default function DashboardClient({
           position: 'fixed', inset: 0, zIndex: 1000,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           background: 'rgba(6,6,6,0.92)',
-          animation: 'glc-levelup-bg 2.8s ease both',
+          animation: 'p180-levelup-bg 2.8s ease both',
           pointerEvents: 'none',
         }}>
-          <div style={{ textAlign: 'center', animation: 'glc-levelup-card 2.8s cubic-bezier(0.34,1.56,0.64,1) both' }}>
+          <div style={{ textAlign: 'center', animation: 'p180-levelup-card 2.8s cubic-bezier(0.34,1.56,0.64,1) both' }}>
             <div style={{ ...M, fontSize: '11px', letterSpacing: '0.2em', color: C.accent, marginBottom: 12, textTransform: 'uppercase' as const }}>
               Niveau supérieur
             </div>
             <div style={{ ...D, fontSize: '52px', fontWeight: 800, color: C.text, letterSpacing: '0.02em', lineHeight: 1 }}>
               {levelUpOverlay}
             </div>
-            <div style={{ height: 2, background: C.accent, margin: '20px auto 0', borderRadius: 1, animation: 'glc-levelup-line 2.8s ease both' }} />
+            <div style={{ height: 2, background: C.accent, margin: '20px auto 0', borderRadius: 1, animation: 'p180-levelup-line 2.8s ease both' }} />
           </div>
         </div>
       )}
@@ -515,7 +492,7 @@ export default function DashboardClient({
               borderLeft: `2px solid ${C.green}`,
             }}>
               <span>WhatsApp</span>
-              <span className="glc-ping" style={{
+              <span className="p180-ping" style={{
                 width: 7, height: 7, flexShrink: 0,
                 borderRadius: '50%',
                 background: C.greenL,
@@ -657,7 +634,7 @@ export default function DashboardClient({
 
 
           {/* ── Stats strip ─────────────────────────────────────────────────── */}
-          <div className="glc-fade" style={{
+          <div className="p180-fade" style={{
             display: 'grid',
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
             background: C.surface,
@@ -709,7 +686,7 @@ export default function DashboardClient({
                   Check-in du jour
                 </h2>
                 {/* Mini ring */}
-                <div className={celebrateRing ? 'glc-ring-done' : undefined} style={{ position: 'relative', width: 72, height: 72, flexShrink: 0 }}>
+                <div className={celebrateRing ? 'p180-ring-done' : undefined} style={{ position: 'relative', width: 72, height: 72, flexShrink: 0 }}>
                   <svg width={72} height={72} style={{ transform: 'rotate(-90deg)', display: 'block' }}>
                     <circle cx={36} cy={36} r={28} fill="none" stroke={C.border} strokeWidth={5} />
                     <circle cx={36} cy={36} r={28} fill="none"
@@ -753,7 +730,7 @@ export default function DashboardClient({
                               key={habit.id}
                               onClick={() => handleToggle(habit.id)}
                               disabled={!!loadingId}
-                              className={`glc-slide glc-habit-row`}
+                              className={`p180-slide p180-habit-row`}
                               style={{
                                 animationDelay: `${i * 55}ms`,
                                 display: 'flex', alignItems: 'center', gap: 20,
@@ -814,7 +791,7 @@ export default function DashboardClient({
                               key={habit.id}
                               onClick={() => handleToggle(habit.id)}
                               disabled={!!loadingId}
-                              className={`glc-slide glc-habit-row`}
+                              className={`p180-slide p180-habit-row`}
                               style={{
                                 animationDelay: `${i * 55}ms`,
                                 display: 'flex', alignItems: 'center', gap: 20,
@@ -869,7 +846,7 @@ export default function DashboardClient({
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
               {/* XP card */}
-              <div className="glc-fade" style={{
+              <div className="p180-fade" style={{
                 background: `linear-gradient(180deg, #110507 0%, ${C.surface} 60%)`,
                 border: `1px solid ${C.border}`,
                 borderTop: `2px solid ${C.accent}`,
@@ -918,7 +895,7 @@ export default function DashboardClient({
               </div>
 
               {/* Streak card */}
-              <div className="glc-fade" style={{
+              <div className="p180-fade" style={{
                 background: C.surface,
                 border: legendStreak ? `1px solid ${C.accentL}50` : `1px solid ${C.border}`,
                 borderTop: legendStreak ? `2px solid ${C.accentL}` : hotStreak ? `2px solid ${C.accentL}` : `1px solid ${C.border}`,
@@ -959,7 +936,7 @@ export default function DashboardClient({
               </div>
 
               {/* Badges card */}
-              <div className="glc-fade" style={{
+              <div className="p180-fade" style={{
                 background: C.surface, border: `1px solid ${C.border}`,
                 padding: '20px 24px',
                 animationDelay: '0.22s',
@@ -1002,7 +979,7 @@ export default function DashboardClient({
 
               {/* WhatsApp CTA card */}
               {whatsappLink && (
-                <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="glc-fade" style={{
+                <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="p180-fade" style={{
                   display: 'block',
                   background: '#010F06',
                   border: `1px solid ${C.green}30`,
@@ -1027,7 +1004,7 @@ export default function DashboardClient({
 
               {/* Objectif */}
               {objectifText && (
-                <div className="glc-fade" style={{
+                <div className="p180-fade" style={{
                   background: C.surface, border: `1px solid ${C.border}`,
                   padding: '20px 24px',
                   animationDelay: '0.3s',
@@ -1043,7 +1020,7 @@ export default function DashboardClient({
 
               {/* Vision */}
               {visionText && (
-                <div className="glc-fade" style={{
+                <div className="p180-fade" style={{
                   background: C.surface,
                   border: `1px solid ${C.border}`,
                   borderTop: `2px solid ${C.accent}`,
@@ -1063,7 +1040,7 @@ export default function DashboardClient({
 
           {/* ── Leaderboard ─────────────────────────────────────────────────── */}
           {leaderboard.length > 0 && (
-            <div className="glc-fade" style={{ animationDelay: '0.4s' }}>
+            <div className="p180-fade" style={{ animationDelay: '0.4s' }}>
               <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.3em', color: C.accent, textTransform: 'uppercase' as const, marginBottom: 8 }}>
                 Membres actifs
               </div>

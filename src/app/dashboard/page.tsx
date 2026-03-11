@@ -93,7 +93,7 @@ export default async function DashboardPage() {
         (gamification as { xp_total: number; current_streak: number; longest_streak: number; level: number })
         ?? { xp_total: 0, current_streak: 0, longest_streak: 0, level: 1 }
       }
-      habits={(habits ?? []) as Array<{ id: string; name: string; category: string }>}
+      habits={(habits ?? []) as Array<{ id: string; name: string; category: 'habit' | 'mission' }>}
       completedHabitIds={completedHabitIds}
       responses={responses}
       leaderboard={leaderboard}

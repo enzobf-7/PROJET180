@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import GlcLogo from '@/components/GlcLogo'
-import { GlcInput } from '@/components/GlcInput'
-import { GlcButton } from '@/components/GlcButton'
+import P180Logo from '@/components/P180Logo'
+import { P180Input } from '@/components/P180Input'
+import { P180Button } from '@/components/P180Button'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -35,26 +35,23 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(58,134,255,0.1)_0%,transparent_70%)]" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-glc-accent/4 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-p180-accent/4 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="w-full max-w-[360px] relative z-10 animate-fade-in">
         {/* Logo + heading */}
         <div className="text-center mb-10">
-          <div className="flex justify-center mb-5">
-            <GlcLogo size="xl" />
+          <div className="flex justify-center mb-3">
+            <P180Logo size="xl" />
           </div>
-          <h1 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '1.5rem', letterSpacing: '0.06em', color: '#F2F2F5', textTransform: 'uppercase', marginBottom: 6, whiteSpace: 'nowrap' }}>
-            Projet180
-          </h1>
           <p style={{ fontSize: '0.8rem', color: '#888', letterSpacing: '0.03em' }}>
-            180 jours pour changer ta vie
+            Ta nouvelle vie commence maintenant
           </p>
         </div>
 
         {/* Form card */}
-        <div className="bg-glc-card border border-glc-border rounded-2xl p-7 shadow-[0_8px_40px_rgba(0,0,0,0.5)]">
+        <div className="bg-p180-card border border-p180-accent rounded-2xl p-7 shadow-[0_4px_30px_rgba(58,134,255,0.15)]">
           <form onSubmit={handleLogin} className="space-y-5">
-            <GlcInput
+            <P180Input
               label="Email"
               type="email"
               value={email}
@@ -64,7 +61,7 @@ export default function LoginPage() {
               autoComplete="email"
             />
 
-            <GlcInput
+            <P180Input
               label="Mot de passe"
               type="password"
               value={password}
@@ -80,14 +77,14 @@ export default function LoginPage() {
               </div>
             )}
 
-            <GlcButton
+            <P180Button
               type="submit"
               loading={loading}
               fullWidth
               className="mt-1"
             >
               {loading ? 'Connexion...' : 'Se connecter'}
-            </GlcButton>
+            </P180Button>
           </form>
         </div>
 

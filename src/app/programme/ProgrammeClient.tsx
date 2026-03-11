@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import GlcLogo from '@/components/GlcLogo'
+import P180Logo from '@/components/P180Logo'
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -64,18 +64,7 @@ const PHASES = [
   { phase: 6, label: 'Excellence',    weeks: [21,22,23,24,25,26],    days: '141–180' },
 ]
 
-// ─── Level system ─────────────────────────────────────────────────────────────
-const LEVELS = [
-  { name: 'Recrue',    min: 0,     max: 500   },
-  { name: 'Aspirant',  min: 500,   max: 1500  },
-  { name: 'Disciple',  min: 1500,  max: 3000  },
-  { name: 'Initié',    min: 3000,  max: 6000  },
-  { name: 'Élite',     min: 6000,  max: 12000 },
-  { name: 'ÉLITE MAX', min: 12000, max: Infinity },
-]
-function getCurrentLevel(xp: number) {
-  return LEVELS.find(l => xp >= l.min && xp < l.max) ?? LEVELS[LEVELS.length - 1]
-}
+import { getCurrentLevel } from '@/lib/levels'
 
 // ─── useCountdown ─────────────────────────────────────────────────────────────
 function useCountdown(startDate: string | null) {
@@ -179,7 +168,7 @@ export default function ProgrammeClient({
       }}>
         {/* Logo */}
         <div style={{ padding: '20px 20px 18px', borderBottom: `1px solid ${C.border}` }}>
-          <GlcLogo size="sm" showText />
+          <P180Logo size="sm" showText />
         </div>
 
         {/* Nav */}

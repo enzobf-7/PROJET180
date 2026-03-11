@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
   }
 
   const admin = createAdminClient()
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://glc-app.vercel.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://projet180.vercel.app'
 
   // Fetch all clients with a completed onboarding
   const { data: onboardings, error: onbErr } = await admin
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
           'content-type': 'application/json',
         },
         body: JSON.stringify({
-          sender: { name: 'Robin — Projet180', email: 'noreply@gentlemanletal.club' },
+          sender: { name: 'Robin — Projet180', email: 'noreply@projet180.fr' },
           to: [{ email: profile.email, name: firstName }],
           subject: msg.subject,
           htmlContent: `

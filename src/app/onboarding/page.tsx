@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import GlcLogo from '@/components/GlcLogo'
-import { GlcButton } from '@/components/GlcButton'
+import P180Logo from '@/components/P180Logo'
+import { P180Button } from '@/components/P180Button'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -61,8 +61,8 @@ export default function OnboardingPage() {
   })
   const [settings, setSettings] = useState<AppSettings>({
     whatsapp_link: 'https://chat.whatsapp.com/BqQlrH78LvlH5a7jEdepSG?mode=gi_t',
-    skool_link: 'https://www.skool.com/gentlemanletalclub',
-    iclosed_link: 'https://app.iclosed.io/e/gentlemanletal/onboarding-glc',
+    skool_link: 'https://www.skool.com/projet180',
+    iclosed_link: 'https://app.iclosed.io/e/projet180/onboarding',
     contract_pdf_url: '',
   })
   const [userId, setUserId] = useState<string | null>(null)
@@ -231,7 +231,7 @@ export default function OnboardingPage() {
       <header className="sticky top-0 z-50 bg-[#060606]/95 backdrop-blur-sm border-b border-[#1E1E1E]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <GlcLogo size="sm" />
+            <P180Logo size="sm" />
             <span className="text-[#1E1E1E]">|</span>
             <span className="text-[#F2F2F5] text-base font-black uppercase tracking-widest">Onboarding</span>
           </div>
@@ -487,14 +487,14 @@ function Step1Contract({
       </div>
 
       {/* Sign button */}
-      <GlcButton
+      <P180Button
         onClick={onSign}
         disabled={!accepted || !signatureName.trim()}
         loading={loading}
         fullWidth
       >
         {loading ? 'Signature en cours…' : 'Signer le contrat'}
-      </GlcButton>
+      </P180Button>
 
       <p className="text-center text-xs text-[#484848]">
         Ta signature — nom, date, heure — est enregistrée et constitue une preuve légale d'acceptation.
@@ -553,32 +553,32 @@ function Step2Questionnaire({
       {/* Navigation */}
       <div className="flex gap-3">
         {section > 1 && (
-          <GlcButton
+          <P180Button
             variant="ghost"
             size="md"
             onClick={() => setSection(section - 1)}
             className="flex-1"
           >
             ← Précédent
-          </GlcButton>
+          </P180Button>
         )}
         {section < totalSections ? (
-          <GlcButton
+          <P180Button
             size="md"
             onClick={() => setSection(section + 1)}
             className="flex-1"
           >
             Suivant →
-          </GlcButton>
+          </P180Button>
         ) : (
-          <GlcButton
+          <P180Button
             size="md"
             onClick={onSubmit}
             loading={loading}
             className="flex-1"
           >
             {loading ? 'Envoi…' : 'Envoyer'}
-          </GlcButton>
+          </P180Button>
         )}
       </div>
     </div>
@@ -738,9 +738,9 @@ function Step3Link({
       <div className="rounded-xl border border-[#1E1E1E] bg-[#0F0F0F] p-6 text-center space-y-4">
         <div className="text-7xl">{icon}</div>
         <p className="text-[#484848] text-sm leading-relaxed">{details ?? description}</p>
-        <GlcButton onClick={onConfirm} fullWidth>
+        <P180Button onClick={onConfirm} fullWidth>
           {hasLink ? `${cta} →` : 'Passer cette étape →'}
-        </GlcButton>
+        </P180Button>
         <p className="text-xs text-[#484848]">
           {hasLink
             ? "Le lien s'ouvre dans un nouvel onglet. Cette étape sera automatiquement validée."
@@ -801,9 +801,9 @@ function Step5Call({
           <p className="text-[#484848] text-sm leading-relaxed">
             Choisis le créneau qui te convient. Ce call de démarrage est le point de lancement de ta transformation.
           </p>
-          <GlcButton onClick={onBook} fullWidth>
+          <P180Button onClick={onBook} fullWidth>
             Réserver mon call →
-          </GlcButton>
+          </P180Button>
         </div>
       )}
     </div>
@@ -841,9 +841,9 @@ function StepDone({ label, onContinue }: { label: string; onContinue: () => void
         </div>
         <p className="text-[#F2F2F5] text-sm font-black uppercase tracking-widest">{label}</p>
       </div>
-      <GlcButton onClick={onContinue} fullWidth>
+      <P180Button onClick={onContinue} fullWidth>
         Continuer →
-      </GlcButton>
+      </P180Button>
     </div>
   )
 }
@@ -949,7 +949,7 @@ function LoadingScreen() {
   return (
     <div className="min-h-screen bg-[#060606] flex items-center justify-center">
       <div className="space-y-3 text-center">
-        <GlcLogo size="md" />
+        <P180Logo size="md" />
         <div className="text-[#484848] text-xs animate-pulse">Chargement…</div>
       </div>
     </div>
@@ -973,7 +973,7 @@ function RedirectScreen({ onDone }: { onDone: () => void }) {
         }
       `}</style>
 
-      <GlcLogo size="xl" />
+      <P180Logo size="xl" />
 
       <div
         className="rounded-sm overflow-hidden"
