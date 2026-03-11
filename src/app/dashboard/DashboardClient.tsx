@@ -499,17 +499,11 @@ export default function DashboardClient({
             <div style={{ height: '100%', width: `${daysPct}%`, background: `linear-gradient(90deg, ${C.accent}, ${C.accentL})`, transition: 'width 1.2s ease' }} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '10px 16px' : '10px 40px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <span style={{ ...D, fontWeight: 900, fontSize: '13px', letterSpacing: '0.32em', color: C.accent, textTransform: 'uppercase' as const }}>
-                GLC
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+              <span style={{ ...D, fontWeight: 900, fontSize: '26px', letterSpacing: '0.06em', color: C.text, lineHeight: 1 }}>
+                JOUR {jourX}
               </span>
-              <div style={{ width: 1, height: 14, background: C.border }} />
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
-                <span style={{ ...D, fontWeight: 900, fontSize: '18px', letterSpacing: '0.06em', color: C.text, lineHeight: 1 }}>
-                  JOUR {String(jourX).padStart(3, '0')}
-                </span>
-                <span style={{ ...M, fontSize: '10px', color: C.muted }}>/ 180 — {daysLeft}j</span>
-              </div>
+              <span style={{ ...M, fontSize: '11px', color: C.muted }}>/ 180 — {daysLeft}j restants</span>
             </div>
             {!isMobile && onboardingDate && (
               <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
@@ -546,7 +540,7 @@ export default function DashboardClient({
           {/* Big day number row */}
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: isMobile ? 12 : 20, marginBottom: 16, position: 'relative' }}>
             <span style={{ ...D, fontWeight: 900, fontSize: isMobile ? '60px' : '76px', letterSpacing: '-0.01em', color: C.text, lineHeight: 0.88 }}>
-              JOUR&nbsp;{String(jourX).padStart(3, '0')}
+              JOUR&nbsp;{jourX}
             </span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5, paddingBottom: isMobile ? 7 : 9 }}>
               <span style={{ ...D, fontWeight: 700, fontSize: '13px', letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: C.accent }}>
