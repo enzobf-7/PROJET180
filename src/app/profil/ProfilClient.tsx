@@ -167,7 +167,7 @@ export default function ProfilClient({ jourX, email, responses, gamification, on
       }}>
         {/* Logo */}
         <div style={{ padding: '20px 20px 18px', borderBottom: `1px solid ${C.border}` }}>
-          <P180Logo size="sm" showText />
+          <P180Logo size="sm" />
         </div>
 
         {/* Nav */}
