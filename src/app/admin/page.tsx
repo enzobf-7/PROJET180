@@ -33,7 +33,24 @@ interface Habit {
   created_at: string
 }
 
-type Tab = 'clients' | 'missions' | 'configuration' | 'messagerie'
+type Tab = 'clients' | 'missions' | 'configuration'
+
+function InitialsBadge({ firstName, lastName }: { firstName: string; lastName: string }) {
+  const initials = `${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase()
+  return (
+    <div style={{
+      width: 34, height: 34, borderRadius: 8,
+      background: 'linear-gradient(135deg, #1A0808 0%, #2A0A0A 100%)',
+      border: '1px solid #3A1010',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flexShrink: 0,
+      fontFamily: 'var(--font-barlow, "Barlow Condensed", sans-serif)',
+      fontWeight: 800, fontSize: 13, color: '#8B1A1A', letterSpacing: '0.04em',
+    }}>
+      {initials || '?'}
+    </div>
+  )
+}
 
 export default function AdminPage() {
   const supabase = createClient()
@@ -203,10 +220,17 @@ export default function AdminPage() {
   // ────────── Loading screen ──────────
   if (loadingSettings) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#060606]">
-        <div className="space-y-3 text-center">
-          <div className="text-[#8B1A1A] font-black tracking-widest text-lg uppercase">GLC</div>
-          <div className="text-[#484848] text-xs animate-pulse">Chargement de ton espace admin…</div>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#060606' }}>
+        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
+          <div style={{
+            fontFamily: 'var(--font-barlow, "Barlow Condensed", sans-serif)',
+            fontWeight: 900, fontSize: 28, letterSpacing: '0.3em',
+            background: 'linear-gradient(135deg, #8B1A1A, #C04040)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          }}>GLC</div>
+          <div style={{ color: '#484848', fontSize: 11, letterSpacing: '0.15em', textTransform: 'uppercase', animation: 'pulse 2s infinite' }}>
+            Chargement…
+          </div>
         </div>
       </div>
     )
@@ -214,9 +238,9 @@ export default function AdminPage() {
 
   if (!settings) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#060606] text-[#F5F5F5]">
-        <p className="text-sm text-[#484848]">
-          Aucune configuration d&apos;application trouvée. Vérifie la table <span className="font-mono">app_settings</span>.
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#060606', color: '#F5F5F5' }}>
+        <p style={{ fontSize: 13, color: '#484848' }}>
+          Aucune configuration trouvée. Vérifie la table <code style={{ fontFamily: 'monospace' }}>app_settings</code>.
         </p>
       </div>
     )
@@ -227,146 +251,284 @@ export default function AdminPage() {
   const tabs: { key: Tab; label: string }[] = [
     { key: 'clients', label: 'Clients' },
     { key: 'missions', label: 'Missions' },
-    { key: 'configuration', label: 'Configuration' },
-    { key: 'messagerie', label: 'Messagerie' },
+    { key: 'configuration', label: 'Config' },
   ]
 
-  return (
-    <div className="min-h-screen bg-[#060606] text-[#F5F5F5]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(139,26,26,0.10)_0%,_transparent_55%)] pointer-events-none" />
+  const inputStyle: React.CSSProperties = {
+    width: '100%', background: '#060606', border: '1px solid #1E1E1E',
+    borderRadius: 10, padding: '10px 14px', fontSize: 13,
+    color: '#F5F5F5', outline: 'none', boxSizing: 'border-box',
+    fontFamily: 'inherit', transition: 'border-color 0.15s',
+  }
 
-      {/* Header */}
-      <header className="relative border-b border-[#1E1E1E] bg-[#060606]/90 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-4 py-5 flex flex-col items-center gap-1">
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#484848]">Admin</span>
-          <h1 className="text-xl font-black tracking-tight text-[#F5F5F5]">Centre de contrôle Robin</h1>
+  return (
+    <div style={{ minHeight: '100vh', background: '#060606', color: '#F5F5F5' }}>
+
+      {/* Radial glow top */}
+      <div style={{
+        position: 'fixed', inset: 0, pointerEvents: 'none',
+        background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(139,26,26,0.13) 0%, transparent 65%)',
+        zIndex: 0,
+      }} />
+
+      {/* ── HEADER ── */}
+      <header style={{
+        position: 'relative', zIndex: 10,
+        borderBottom: '1px solid #1E1E1E',
+        background: 'rgba(6,6,6,0.95)',
+        backdropFilter: 'blur(12px)',
+      }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 20px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16 }}>
+            <div>
+              <div style={{
+                fontSize: 10, fontWeight: 800, letterSpacing: '0.35em',
+                textTransform: 'uppercase', color: '#8B1A1A', marginBottom: 4,
+              }}>
+                Gentleman Létal Club — Admin
+              </div>
+              <h1 style={{
+                fontFamily: 'var(--font-barlow, "Barlow Condensed", sans-serif)',
+                fontWeight: 900, fontSize: 32, letterSpacing: '-0.01em',
+                lineHeight: 1, color: '#F5F5F5', margin: 0,
+                textTransform: 'uppercase',
+              }}>
+                Centre de contrôle
+              </h1>
+            </div>
+            {!loadingClients && (
+              <div style={{
+                display: 'flex', gap: 20, alignItems: 'center',
+              }}>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: '#F5F5F5', lineHeight: 1 }}>
+                    {clients.length}
+                  </div>
+                  <div style={{ fontSize: 10, color: '#484848', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: 2 }}>
+                    client{clients.length !== 1 ? 's' : ''}
+                  </div>
+                </div>
+                <div style={{
+                  width: 1, height: 28, background: '#1E1E1E',
+                }} />
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: '#F5F5F5', lineHeight: 1 }}>
+                    {clients.filter(c => c.onboarding_completed).length}
+                  </div>
+                  <div style={{ fontSize: 10, color: '#484848', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: 2 }}>
+                    actifs
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
-      {/* Tab bar */}
-      <div className="relative border-b border-[#1E1E1E] bg-[#060606]/80 sticky top-0 z-10 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-4">
-          <nav className="flex gap-1">
-            {tabs.map(tab => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-3.5 text-sm font-semibold transition-colors relative ${
-                  activeTab === tab.key
-                    ? 'text-[#F5F5F5]'
-                    : 'text-[#484848] hover:text-[#888888]'
-                }`}
-              >
-                {tab.label}
-                {activeTab === tab.key && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#8B1A1A] rounded-t-full" />
-                )}
-              </button>
-            ))}
-          </nav>
+      {/* ── TAB BAR ── */}
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 20,
+        borderBottom: '1px solid #1E1E1E',
+        background: 'rgba(6,6,6,0.97)',
+        backdropFilter: 'blur(12px)',
+      }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 20px', display: 'flex', gap: 0 }}>
+          {tabs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              style={{
+                padding: '14px 18px',
+                background: 'none', border: 'none', cursor: 'pointer',
+                fontSize: 11, fontWeight: 700,
+                letterSpacing: '0.18em', textTransform: 'uppercase',
+                color: activeTab === tab.key ? '#F5F5F5' : '#484848',
+                position: 'relative',
+                transition: 'color 0.15s',
+              }}
+            >
+              {tab.label}
+              {activeTab === tab.key && (
+                <span style={{
+                  position: 'absolute', bottom: 0, left: 0, right: 0,
+                  height: 2, background: '#8B1A1A', borderRadius: '2px 2px 0 0',
+                }} />
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
-      <main className="relative max-w-4xl mx-auto px-4 py-8">
+      {/* ── MAIN ── */}
+      <main style={{ position: 'relative', zIndex: 1, maxWidth: 900, margin: '0 auto', padding: '28px 20px 60px' }}>
 
-        {/* ── Tab: Clients ── */}
+        {/* ══ Tab: Clients ══ */}
         {activeTab === 'clients' && (
-          <div className="space-y-6">
-            {/* Clients table */}
-            <div className="rounded-2xl border border-[#1E1E1E] bg-[#0F0F0F] overflow-hidden">
-              <div className="px-5 py-4 border-b border-[#1E1E1E] flex items-center justify-between">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-[#484848]">
-                  {loadingClients ? 'Chargement…' : `${clients.length} client${clients.length !== 1 ? 's' : ''}`}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+            {/* Clients list */}
+            <div style={{ borderRadius: 14, border: '1px solid #1E1E1E', background: '#0F0F0F', overflow: 'hidden' }}>
+              {/* Table header */}
+              <div style={{
+                padding: '14px 20px', borderBottom: '1px solid #1E1E1E',
+                display: 'grid', gridTemplateColumns: '1fr auto',
+                alignItems: 'center',
+              }}>
+                <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#484848' }}>
+                  {loadingClients ? 'Chargement…' : `${clients.length} client${clients.length !== 1 ? 's' : ''} inscrits`}
                 </span>
               </div>
+
               {loadingClients ? (
-                <div className="px-6 py-8 text-center text-[#484848] text-sm animate-pulse">Chargement des clients…</div>
+                <div style={{ padding: '40px 20px', textAlign: 'center', color: '#484848', fontSize: 13 }}>
+                  Chargement des clients…
+                </div>
               ) : clients.length === 0 ? (
-                <div className="px-6 py-8 text-center text-[#484848] text-sm">Aucun client pour l&apos;instant.</div>
+                <div style={{ padding: '48px 20px', textAlign: 'center' }}>
+                  <div style={{ color: '#8B1A1A', fontSize: 28, marginBottom: 10 }}>0</div>
+                  <div style={{ color: '#484848', fontSize: 13 }}>Aucun client pour l&apos;instant.</div>
+                </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-[#1E1E1E]">
-                        <th className="text-left px-5 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#484848]">Client</th>
-                        <th className="text-left px-5 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#484848]">Email</th>
-                        <th className="text-right px-5 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#484848]">Jour</th>
-                        <th className="text-right px-5 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#484848]">XP</th>
-                        <th className="text-left px-5 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#484848]">Niveau</th>
-                        <th className="text-center px-5 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#484848]">Onboarding</th>
-                        <th className="px-5 py-3" />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {clients.map((c, i) => (
-                        <tr
-                          key={c.id}
-                          className={`border-b border-[#1E1E1E] last:border-0 ${i % 2 === 0 ? '' : 'bg-[#060606]/40'}`}
-                        >
-                          <td className="px-5 py-3 font-medium text-[#F5F5F5]">
+                <div>
+                  {clients.map((c, i) => {
+                    const progress = Math.min(100, Math.round((c.jourX / 180) * 100))
+                    return (
+                      <div
+                        key={c.id}
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: '34px 1fr auto auto auto auto',
+                          alignItems: 'center',
+                          gap: 14,
+                          padding: '14px 20px',
+                          borderBottom: i < clients.length - 1 ? '1px solid #111111' : 'none',
+                          background: i % 2 === 1 ? 'rgba(255,255,255,0.01)' : 'transparent',
+                          transition: 'background 0.1s',
+                        }}
+                      >
+                        <InitialsBadge firstName={c.first_name} lastName={c.last_name} />
+
+                        {/* Name + email + progress bar */}
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontWeight: 600, fontSize: 14, color: '#F5F5F5', lineHeight: 1.2 }}>
                             {c.first_name} {c.last_name}
-                          </td>
-                          <td className="px-5 py-3 text-[#484848] font-mono text-xs">{c.email}</td>
-                          <td className="px-5 py-3 text-right tabular-nums">
-                            {c.jourX > 0 ? (
-                              <span className="text-[#F5F5F5]">J{c.jourX}</span>
-                            ) : (
-                              <span className="text-[#484848]">—</span>
-                            )}
-                          </td>
-                          <td className="px-5 py-3 text-right tabular-nums text-[#F5F5F5]">{c.xp_total.toLocaleString('fr')}</td>
-                          <td className="px-5 py-3">
-                            <span className="text-xs font-black uppercase tracking-wider text-[#8B1A1A]">{c.level}</span>
-                          </td>
-                          <td className="px-5 py-3 text-center">
-                            {c.onboarding_completed ? (
-                              <span className="inline-block w-2 h-2 rounded-full bg-[#22c55e]" title="Terminé" />
-                            ) : (
-                              <span className="inline-block w-2 h-2 rounded-full bg-[#484848]" title="En cours" />
-                            )}
-                          </td>
-                          <td className="px-5 py-3 text-right">
-                            <a
-                              href={`/admin/client/${c.id}`}
-                              className="text-xs text-[#484848] hover:text-[#F5F5F5] transition-colors"
-                            >
-                              Voir fiche →
-                            </a>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          </div>
+                          <div style={{ fontSize: 11, color: '#484848', fontFamily: 'var(--font-mono, "JetBrains Mono", monospace)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {c.email}
+                          </div>
+                          {c.jourX > 0 && (
+                            <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 7 }}>
+                              <div style={{ flex: 1, height: 3, borderRadius: 2, background: '#1E1E1E', overflow: 'hidden', maxWidth: 120 }}>
+                                <div style={{ height: '100%', borderRadius: 2, background: '#8B1A1A', width: `${progress}%` }} />
+                              </div>
+                              <span style={{ fontSize: 10, color: '#8B1A1A', fontWeight: 700, letterSpacing: '0.05em' }}>
+                                J{c.jourX}/180
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* XP */}
+                        <div style={{ textAlign: 'right', minWidth: 56 }}>
+                          <div style={{ fontSize: 15, fontWeight: 700, color: '#F5F5F5', fontFamily: 'var(--font-mono, "JetBrains Mono", monospace)', letterSpacing: '-0.02em' }}>
+                            {c.xp_total.toLocaleString('fr')}
+                          </div>
+                          <div style={{ fontSize: 9, color: '#484848', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 1 }}>xp</div>
+                        </div>
+
+                        {/* Level */}
+                        <div style={{
+                          padding: '3px 10px', borderRadius: 6,
+                          background: 'rgba(139,26,26,0.15)',
+                          border: '1px solid rgba(139,26,26,0.3)',
+                          fontSize: 10, fontWeight: 800,
+                          letterSpacing: '0.12em', textTransform: 'uppercase',
+                          color: '#C04040', whiteSpace: 'nowrap',
+                        }}>
+                          {c.level || 'N/A'}
+                        </div>
+
+                        {/* Onboarding badge */}
+                        <div style={{
+                          padding: '3px 10px', borderRadius: 6,
+                          background: c.onboarding_completed ? 'rgba(34,197,94,0.1)' : 'rgba(72,72,72,0.15)',
+                          border: `1px solid ${c.onboarding_completed ? 'rgba(34,197,94,0.3)' : '#1E1E1E'}`,
+                          fontSize: 10, fontWeight: 700,
+                          letterSpacing: '0.1em', textTransform: 'uppercase',
+                          color: c.onboarding_completed ? '#22c55e' : '#484848',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {c.onboarding_completed ? 'Actif' : 'Onboarding'}
+                        </div>
+
+                        {/* Fiche link */}
+                        <a
+                          href={`/admin/client/${c.id}`}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 5,
+                            fontSize: 11, color: '#484848', textDecoration: 'none',
+                            fontWeight: 600, letterSpacing: '0.05em',
+                            padding: '5px 10px', borderRadius: 8,
+                            border: '1px solid #1E1E1E',
+                            background: '#0F0F0F',
+                            transition: 'all 0.15s',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          Fiche
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                          </svg>
+                        </a>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </div>
 
-            {/* Add client form */}
-            <details className="group rounded-2xl border border-[#1E1E1E] bg-[#0F0F0F] overflow-hidden">
-              <summary className="px-5 py-4 flex items-center justify-between cursor-pointer list-none select-none hover:bg-[#111111] transition-colors">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-[#484848]">Ajouter un client manuellement</span>
-                <svg className="w-4 h-4 text-[#484848] transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            {/* Add client — collapsible */}
+            <details className="group" style={{ borderRadius: 14, border: '1px solid #1E1E1E', background: '#0F0F0F', overflow: 'hidden' }}>
+              <summary style={{
+                padding: '14px 20px',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                cursor: 'pointer', listStyle: 'none', userSelect: 'none',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{
+                    width: 24, height: 24, borderRadius: 6,
+                    background: 'rgba(139,26,26,0.15)', border: '1px solid rgba(139,26,26,0.25)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 14, color: '#8B1A1A', fontWeight: 800,
+                  }}>+</div>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#484848' }}>
+                    Ajouter un client manuellement
+                  </span>
+                </div>
+                <svg className="transition-transform group-open:rotate-180" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#484848" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="m19 9-7 7-7-7" />
                 </svg>
               </summary>
-              <div className="px-5 pb-5 pt-2 border-t border-[#1E1E1E]">
-                <p className="text-xs text-[#484848] mb-4">Fallback si Stripe ne déclenche pas le webhook. Crée le compte + envoie l&apos;email de bienvenue.</p>
-                <form onSubmit={handleAddClient} className="space-y-4">
-                  <div className="grid gap-3 sm:grid-cols-3">
+              <div style={{ padding: '0 20px 20px', borderTop: '1px solid #1E1E1E' }}>
+                <p style={{ fontSize: 12, color: '#484848', margin: '16px 0 16px', lineHeight: 1.5 }}>
+                  Fallback si Stripe ne déclenche pas le webhook. Crée le compte + envoie l&apos;email de bienvenue.
+                </p>
+                <form onSubmit={handleAddClient} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
                     <input
                       type="text"
                       placeholder="Prénom *"
                       value={newClientFirstName}
                       onChange={e => setNewClientFirstName(e.target.value)}
                       required
-                      className="bg-[#060606] border border-[#1E1E1E] rounded-xl px-4 py-2.5 text-sm text-[#F5F5F5] placeholder:text-[#484848] focus:outline-none focus:border-[#8B1A1A] transition-colors"
+                      style={inputStyle}
                     />
                     <input
                       type="text"
                       placeholder="Nom (optionnel)"
                       value={newClientLastName}
                       onChange={e => setNewClientLastName(e.target.value)}
-                      className="bg-[#060606] border border-[#1E1E1E] rounded-xl px-4 py-2.5 text-sm text-[#F5F5F5] placeholder:text-[#484848] focus:outline-none focus:border-[#8B1A1A] transition-colors"
+                      style={inputStyle}
                     />
                     <input
                       type="email"
@@ -374,20 +536,27 @@ export default function AdminPage() {
                       value={newClientEmail}
                       onChange={e => setNewClientEmail(e.target.value)}
                       required
-                      className="bg-[#060606] border border-[#1E1E1E] rounded-xl px-4 py-2.5 text-sm text-[#F5F5F5] placeholder:text-[#484848] focus:outline-none focus:border-[#8B1A1A] transition-colors"
+                      style={inputStyle}
                     />
                   </div>
                   {clientErr && (
-                    <div className="text-sm text-[#f97373] bg-[#3b0b0b] border border-[#7f1d1d] rounded-xl px-4 py-3">{clientErr}</div>
+                    <div style={{ fontSize: 13, color: '#f97373', background: '#1a0000', border: '1px solid #7f1d1d', borderRadius: 10, padding: '10px 14px' }}>{clientErr}</div>
                   )}
                   {clientMsg && (
-                    <div className="text-sm text-[#22c55e] bg-[#052e16] border border-[#16a34a] rounded-xl px-4 py-3">{clientMsg}</div>
+                    <div style={{ fontSize: 13, color: '#22c55e', background: '#001a00', border: '1px solid #16a34a', borderRadius: 10, padding: '10px 14px' }}>{clientMsg}</div>
                   )}
-                  <div className="flex justify-end">
+                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <button
                       type="submit"
                       disabled={addingClient}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#8B1A1A] hover:bg-[#A32020] text-sm font-semibold uppercase tracking-[0.14em] text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+                      style={{
+                        padding: '10px 22px', borderRadius: 10,
+                        background: addingClient ? '#3A1010' : '#8B1A1A',
+                        border: 'none', cursor: addingClient ? 'not-allowed' : 'pointer',
+                        fontSize: 11, fontWeight: 700, letterSpacing: '0.18em',
+                        textTransform: 'uppercase', color: '#FFFFFF',
+                        transition: 'all 0.15s', opacity: addingClient ? 0.6 : 1,
+                      }}
                     >
                       {addingClient ? 'Création…' : 'Créer le compte + envoyer l\'email'}
                     </button>
@@ -398,18 +567,19 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* ── Tab: Missions ── */}
+        {/* ══ Tab: Missions ══ */}
         {activeTab === 'missions' && (
-          <div className="space-y-4">
-            <div className="rounded-2xl border border-[#1E1E1E] bg-[#0F0F0F] p-6 space-y-4">
-              <div className="space-y-2">
-                <label className="block text-xs font-black uppercase tracking-[0.18em] text-[#484848]">
-                  Sélectionner un client
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ borderRadius: 14, border: '1px solid #1E1E1E', background: '#0F0F0F', overflow: 'hidden' }}>
+              {/* Client selector */}
+              <div style={{ padding: '20px', borderBottom: '1px solid #1E1E1E' }}>
+                <label style={{ display: 'block', fontSize: 10, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#484848', marginBottom: 8 }}>
+                  Client
                 </label>
                 <select
                   value={selectedClientId}
                   onChange={e => setSelectedClientId(e.target.value)}
-                  className="w-full bg-[#060606] border border-[#1E1E1E] rounded-xl px-4 py-2.5 text-sm text-[#F5F5F5] focus:outline-none focus:border-[#8B1A1A] transition-colors"
+                  style={{ ...inputStyle, cursor: 'pointer' }}
                 >
                   <option value="">— Choisir un client —</option>
                   {clients.map(c => (
@@ -420,63 +590,114 @@ export default function AdminPage() {
                 </select>
               </div>
 
-              {selectedClientId && (
-                <>
-                  <form onSubmit={handleAddHabit} className="flex gap-3">
+              {selectedClientId ? (
+                <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {/* Client context banner */}
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '10px 14px', borderRadius: 10,
+                    background: 'rgba(139,26,26,0.08)', border: '1px solid rgba(139,26,26,0.2)',
+                  }}>
+                    <InitialsBadge firstName={selectedClient?.first_name ?? ''} lastName={selectedClient?.last_name ?? ''} />
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#F5F5F5' }}>
+                        {selectedClient?.first_name} {selectedClient?.last_name}
+                      </div>
+                      <div style={{ fontSize: 10, color: '#8B1A1A', letterSpacing: '0.1em', fontWeight: 700 }}>
+                        {habits.filter(h => h.is_active).length} mission{habits.filter(h => h.is_active).length !== 1 ? 's' : ''} active{habits.filter(h => h.is_active).length !== 1 ? 's' : ''}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Add habit */}
+                  <form onSubmit={handleAddHabit} style={{ display: 'flex', gap: 10 }}>
                     <input
                       type="text"
-                      placeholder="Nom de la mission (ex: Froid 3 min)"
+                      placeholder="Nom de la mission (ex : Froid 3 min)"
                       value={newHabitName}
                       onChange={e => setNewHabitName(e.target.value)}
                       required
-                      className="flex-1 bg-[#060606] border border-[#1E1E1E] rounded-xl px-4 py-2.5 text-sm text-[#F5F5F5] placeholder:text-[#484848] focus:outline-none focus:border-[#8B1A1A] transition-colors"
+                      style={{ ...inputStyle, flex: 1 }}
                     />
                     <button
                       type="submit"
                       disabled={addingHabit || !newHabitName.trim()}
-                      className="px-5 py-2.5 rounded-xl bg-[#8B1A1A] hover:bg-[#A32020] text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] whitespace-nowrap"
+                      style={{
+                        padding: '10px 18px', borderRadius: 10,
+                        background: '#8B1A1A', border: 'none',
+                        cursor: addingHabit || !newHabitName.trim() ? 'not-allowed' : 'pointer',
+                        fontSize: 12, fontWeight: 700, letterSpacing: '0.12em',
+                        textTransform: 'uppercase', color: '#FFFFFF',
+                        opacity: addingHabit || !newHabitName.trim() ? 0.5 : 1,
+                        transition: 'all 0.15s', whiteSpace: 'nowrap',
+                      }}
                     >
-                      {addingHabit ? 'Ajout…' : '+ Ajouter'}
+                      {addingHabit ? 'Ajout…' : '+ Mission'}
                     </button>
                   </form>
+
                   {habitErr && (
-                    <div className="text-sm text-[#f97373] bg-[#3b0b0b] border border-[#7f1d1d] rounded-xl px-4 py-3">{habitErr}</div>
+                    <div style={{ fontSize: 13, color: '#f97373', background: '#1a0000', border: '1px solid #7f1d1d', borderRadius: 10, padding: '10px 14px' }}>{habitErr}</div>
                   )}
 
+                  {/* Habits list */}
                   {loadingHabits ? (
-                    <div className="text-center text-[#484848] text-sm py-4 animate-pulse">Chargement…</div>
+                    <div style={{ padding: '24px', textAlign: 'center', color: '#484848', fontSize: 13 }}>Chargement…</div>
                   ) : habits.length === 0 ? (
-                    <div className="text-center text-[#484848] text-sm py-4">
-                      Aucune mission pour {selectedClient?.first_name}.
+                    <div style={{ padding: '32px', textAlign: 'center' }}>
+                      <div style={{ color: '#484848', fontSize: 13 }}>
+                        Aucune mission pour {selectedClient?.first_name}.<br />
+                        <span style={{ fontSize: 11, marginTop: 4, display: 'block' }}>Ajoute sa première mission ci-dessus.</span>
+                      </div>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      {habits.map(habit => (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {habits.map((habit, i) => (
                         <div
                           key={habit.id}
-                          className="flex items-center gap-3 px-4 py-3 rounded-xl border border-[#1E1E1E] bg-[#060606]"
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 12,
+                            padding: '12px 14px', borderRadius: 10,
+                            border: `1px solid ${habit.is_active ? 'rgba(139,26,26,0.25)' : '#1A1A1A'}`,
+                            background: habit.is_active ? 'rgba(139,26,26,0.04)' : '#080808',
+                          }}
                         >
-                          <div className="flex-1 min-w-0">
-                            <span className={`text-sm font-medium ${habit.is_active ? 'text-[#F5F5F5]' : 'text-[#484848] line-through'}`}>
-                              {habit.name}
-                            </span>
-                          </div>
+                          {/* Order indicator */}
+                          <span style={{ fontSize: 10, color: '#333', fontWeight: 700, width: 16, textAlign: 'center', flexShrink: 0 }}>
+                            {String(i + 1).padStart(2, '0')}
+                          </span>
+                          <span style={{
+                            flex: 1, fontSize: 13, fontWeight: 500,
+                            color: habit.is_active ? '#F5F5F5' : '#484848',
+                            textDecoration: habit.is_active ? 'none' : 'line-through',
+                          }}>
+                            {habit.name}
+                          </span>
                           <button
                             onClick={() => handleToggleHabit(habit)}
-                            className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors ${
-                              habit.is_active
-                                ? 'bg-[#8B1A1A]/20 text-[#8B1A1A] hover:bg-[#8B1A1A]/30'
-                                : 'bg-[#1E1E1E] text-[#484848] hover:bg-[#2A2A2A]'
-                            }`}
+                            style={{
+                              padding: '4px 12px', borderRadius: 6, border: 'none',
+                              cursor: 'pointer', fontSize: 10, fontWeight: 700,
+                              letterSpacing: '0.1em', textTransform: 'uppercase',
+                              background: habit.is_active ? 'rgba(139,26,26,0.2)' : '#1E1E1E',
+                              color: habit.is_active ? '#C04040' : '#484848',
+                              transition: 'all 0.15s',
+                            }}
                           >
                             {habit.is_active ? 'Active' : 'Inactive'}
                           </button>
                           <button
                             onClick={() => handleDeleteHabit(habit.id)}
-                            className="p-1.5 rounded-lg text-[#484848] hover:text-[#f97373] hover:bg-[#3b0b0b] transition-colors"
                             title="Supprimer"
+                            style={{
+                              width: 28, height: 28, borderRadius: 7, border: '1px solid transparent',
+                              background: 'transparent', cursor: 'pointer',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              color: '#333', transition: 'all 0.15s',
+                              flexShrink: 0,
+                            }}
                           >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                             </svg>
                           </button>
@@ -484,97 +705,75 @@ export default function AdminPage() {
                       ))}
                     </div>
                   )}
-                </>
+                </div>
+              ) : (
+                <div style={{ padding: '40px 20px', textAlign: 'center', color: '#484848', fontSize: 13 }}>
+                  Sélectionne un client pour gérer ses missions.
+                </div>
               )}
             </div>
           </div>
         )}
 
-        {/* ── Tab: Configuration ── */}
+        {/* ══ Tab: Configuration ══ */}
         {activeTab === 'configuration' && (
-          <form onSubmit={handleSaveSettings} className="rounded-2xl border border-[#1E1E1E] bg-[#0F0F0F] p-6 space-y-5">
-            <p className="text-xs text-[#484848]">Ces liens sont affichés aux clients pendant l&apos;onboarding. À modifier uniquement si une URL change.</p>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-[#484848] uppercase tracking-[0.18em]">Groupe WhatsApp</label>
-                <input
-                  type="url"
-                  value={settings.whatsapp_link}
-                  onChange={(e) => setSettings({ ...settings, whatsapp_link: e.target.value })}
-                  placeholder="https://chat.whatsapp.com/..."
-                  className="w-full bg-[#060606] border border-[#1E1E1E] rounded-xl px-4 py-2.5 text-sm text-[#F5F5F5] placeholder:text-[#484848] focus:outline-none focus:border-[#8B1A1A] transition-colors"
-                />
+          <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ borderRadius: 14, border: '1px solid #1E1E1E', background: '#0F0F0F', overflow: 'hidden' }}>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid #1E1E1E' }}>
+                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#484848' }}>
+                  Liens onboarding
+                </div>
+                <div style={{ fontSize: 12, color: '#333', marginTop: 4 }}>
+                  Affichés aux clients pendant leur onboarding. À modifier uniquement si une URL change.
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-[#484848] uppercase tracking-[0.18em]">Communauté Skool</label>
-                <input
-                  type="url"
-                  value={settings.skool_link}
-                  onChange={(e) => setSettings({ ...settings, skool_link: e.target.value })}
-                  placeholder="https://app.skool.com/..."
-                  className="w-full bg-[#060606] border border-[#1E1E1E] rounded-xl px-4 py-2.5 text-sm text-[#F5F5F5] placeholder:text-[#484848] focus:outline-none focus:border-[#8B1A1A] transition-colors"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-[#484848] uppercase tracking-[0.18em]">Lien de call (iClosed)</label>
-                <input
-                  type="url"
-                  value={settings.iclosed_link}
-                  onChange={(e) => setSettings({ ...settings, iclosed_link: e.target.value })}
-                  placeholder="https://app.iclosed.io/..."
-                  className="w-full bg-[#060606] border border-[#1E1E1E] rounded-xl px-4 py-2.5 text-sm text-[#F5F5F5] placeholder:text-[#484848] focus:outline-none focus:border-[#8B1A1A] transition-colors"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-[#484848] uppercase tracking-[0.18em]">Contrat PDF</label>
-                <input
-                  type="url"
-                  value={settings.contract_pdf_url}
-                  onChange={(e) => setSettings({ ...settings, contract_pdf_url: e.target.value })}
-                  placeholder="https://.../contrat-glc.pdf"
-                  className="w-full bg-[#060606] border border-[#1E1E1E] rounded-xl px-4 py-2.5 text-sm text-[#F5F5F5] placeholder:text-[#484848] focus:outline-none focus:border-[#8B1A1A] transition-colors"
-                />
+              <div style={{ padding: '20px', display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
+                {[
+                  { key: 'whatsapp_link' as keyof AppSettingsRow, label: 'Groupe WhatsApp', placeholder: 'https://chat.whatsapp.com/...' },
+                  { key: 'skool_link' as keyof AppSettingsRow, label: 'Communauté Skool', placeholder: 'https://www.skool.com/...' },
+                  { key: 'iclosed_link' as keyof AppSettingsRow, label: 'Lien de call (iClosed)', placeholder: 'https://app.iclosed.io/...' },
+                  { key: 'contract_pdf_url' as keyof AppSettingsRow, label: 'Contrat PDF', placeholder: 'https://.../contrat-glc.pdf' },
+                ].map(field => (
+                  <div key={field.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#484848' }}>
+                      {field.label}
+                    </label>
+                    <input
+                      type="url"
+                      value={settings[field.key] as string}
+                      onChange={(e) => setSettings({ ...settings, [field.key]: e.target.value })}
+                      placeholder={field.placeholder}
+                      style={inputStyle}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
+
             {settingsErr && (
-              <div className="text-sm text-[#f97373] bg-[#3b0b0b] border border-[#7f1d1d] rounded-xl px-4 py-3">{settingsErr}</div>
+              <div style={{ fontSize: 13, color: '#f97373', background: '#1a0000', border: '1px solid #7f1d1d', borderRadius: 10, padding: '12px 16px' }}>{settingsErr}</div>
             )}
             {settingsMsg && (
-              <div className="text-sm text-[#22c55e] bg-[#052e16] border border-[#16a34a] rounded-xl px-4 py-3">{settingsMsg}</div>
+              <div style={{ fontSize: 13, color: '#22c55e', background: '#001a00', border: '1px solid #16a34a', borderRadius: 10, padding: '12px 16px' }}>{settingsMsg}</div>
             )}
-            <div className="flex justify-end">
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button
                 type="submit"
                 disabled={savingSettings}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#8B1A1A] hover:bg-[#A32020] text-sm font-semibold uppercase tracking-[0.16em] text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+                style={{
+                  padding: '11px 28px', borderRadius: 10,
+                  background: savingSettings ? '#3A1010' : '#8B1A1A',
+                  border: 'none', cursor: savingSettings ? 'not-allowed' : 'pointer',
+                  fontSize: 11, fontWeight: 700, letterSpacing: '0.18em',
+                  textTransform: 'uppercase', color: '#FFFFFF',
+                  opacity: savingSettings ? 0.6 : 1, transition: 'all 0.15s',
+                }}
               >
-                {savingSettings ? 'Enregistrement…' : 'Enregistrer'}
+                {savingSettings ? 'Enregistrement…' : 'Enregistrer les liens'}
               </button>
             </div>
           </form>
-        )}
-
-        {/* ── Tab: Messagerie ── */}
-        {activeTab === 'messagerie' && (
-          <div className="space-y-4">
-            <Link
-              href="/admin/messagerie"
-              className="group flex items-center gap-4 rounded-2xl border border-[#1E1E1E] bg-[#0F0F0F] p-5 hover:border-[#8B1A1A] transition-colors"
-            >
-              <div className="w-10 h-10 rounded-xl bg-[#060606] border border-[#1E1E1E] flex items-center justify-center shrink-0 group-hover:border-[#8B1A1A] transition-colors">
-                <svg className="w-5 h-5 text-[#8B1A1A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-[#F5F5F5]">Messagerie</p>
-                <p className="text-xs text-[#484848] mt-0.5">Conversations avec tes clients</p>
-              </div>
-              <svg className="w-4 h-4 text-[#484848] ml-auto group-hover:text-[#8B1A1A] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-              </svg>
-            </Link>
-          </div>
         )}
 
       </main>
