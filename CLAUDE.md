@@ -64,12 +64,14 @@ created_by text not null check (created_by in ('admin', 'client'))
 | `onboarding_progress` | `user_id` | Étapes 1-5, `completed_at` quand tout est fait |
 | `questionnaire_responses` | `client_id` | 40+ champs réponses formulaire |
 | `programs` | `client_id` | Données programme 180j |
-| `habits` | `client_id` | Habitudes par client, `is_active`, `sort_order` |
+| `habits` | `client_id` | Habitudes par client, `is_active`, `sort_order`, `category` ('habit'\|'mission') |
 | `habit_logs` | `client_id` | Check-ins quotidiens, `date` (YYYY-MM-DD), `completed` |
 | `weekly_reports` | `client_id` | Rapports hebdo auto, `week_number` (1-26) |
 | `gamification` | `client_id` | `xp_total`, `current_streak`, `level` |
 | `messages` | `sender_id`, `receiver_id` | Messagerie Robin ↔ clients |
 | `milestone_emails_sent` | `client_id` | Déduplique les emails J30/J60/J90/J180 |
+| `todos` | `client_id` | To-do journalière, `is_system` (bool), `completed_date` (date) |
+| `wins` | `client_id` | Wins hebdo, `content` text, `week_number` int |
 
 ## Clients Supabase
 ```typescript
@@ -108,11 +110,17 @@ Exécuter dans Supabase SQL Editor (dans cet ordre) :
 ```
 supabase/migrations/20260309_milestone_emails_sent.sql
 supabase/migrations/20260310_contract_signature.sql
+supabase/migrations/20260311_habits_category.sql
+supabase/migrations/20260311_todos.sql
+supabase/migrations/20260311_wins.sql
 ```
 
 ## Go-live checklist
 - [ ] Migration `milestone_emails_sent` exécutée dans Supabase
 - [ ] Migration `contract_signature` exécutée dans Supabase
+- [ ] Migration `habits_category` exécutée dans Supabase
+- [ ] Migration `todos` exécutée dans Supabase
+- [ ] Migration `wins` exécutée dans Supabase
 - [ ] Variables d'env configurées dans Vercel (voir liste ci-dessus)
 - [ ] Stripe webhook URL configurée : `https://app.gentlemanletal.club/api/webhooks/stripe`
 - [ ] Robin a entré ses 4 liens dans `/admin` (WhatsApp, Skool, iClosed, contrat PDF)

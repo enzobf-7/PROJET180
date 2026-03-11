@@ -15,8 +15,8 @@ const C = {
   muted:   '#484848',
   dimmed:  '#161616',
   text:    '#F0F0F0',
-  accent:  '#8B1A1A',
-  accentL: '#A32020',
+  accent:  '#3A86FF',
+  accentL: '#2B75EE',
   green:   '#15803D',
   greenL:  '#22C55E',
 }
@@ -24,7 +24,7 @@ const D = { fontFamily: '"Barlow Condensed", sans-serif' } as const
 const M = { fontFamily: '"JetBrains Mono", monospace' }    as const
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-interface Habit { id: string; name: string }
+interface Habit { id: string; name: string; category: 'habit' | 'mission' }
 interface Gamification {
   xp_total: number; current_streak: number
   longest_streak: number; level: number
@@ -49,12 +49,12 @@ interface XPParticle { id: number; delta: number; multiplier: number }
 
 // ─── Level system ─────────────────────────────────────────────────────────────
 const LEVELS = [
-  { name: 'Initié',          min: 0,     max: 500   },
-  { name: 'Soldat',          min: 500,   max: 1500  },
-  { name: 'Guerrier',        min: 1500,  max: 3000  },
-  { name: 'Combattant',      min: 3000,  max: 6000  },
-  { name: "Homme d'honneur", min: 6000,  max: 12000 },
-  { name: 'Gentleman Létal', min: 12000, max: Infinity },
+  { name: 'Recrue',    min: 0,     max: 500   },
+  { name: 'Aspirant',  min: 500,   max: 1500  },
+  { name: 'Disciple',  min: 1500,  max: 3000  },
+  { name: 'Initié',    min: 3000,  max: 6000  },
+  { name: 'Élite',     min: 6000,  max: 12000 },
+  { name: 'ÉLITE MAX', min: 12000, max: Infinity },
 ]
 
 const STREAK_MILESTONES = [7, 14, 21, 30, 60, 90]
@@ -151,6 +151,84 @@ export default function DashboardClient({
   const countdown = useCountdown(onboardingDate)
   const supabase  = createClient()
 
+  // ── Wins ──────────────────────────────────────────────────────────────────
+  const weekNumber = Math.ceil(jourX / 7)
+  const [wins, setWins] = useState<{ id: string; content: string; created_at: string }[]>([])
+  const [winInput, setWinInput] = useState('')
+  const [winsLoading, setWinsLoading] = useState(true)
+  const [winSubmitting, setWinSubmitting] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    async function fetchWins() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setWinsLoading(false); return }
+      const { data } = await supabase
+        .from('wins')
+        .select('id, content, created_at')
+        .eq('client_id', user.id)
+        .eq('week_number', weekNumber)
+        .order('created_at', { ascending: true })
+      if (!cancelled) {
+        setWins(data ?? [])
+        setWinsLoading(false)
+      }
+    }
+    fetchWins()
+    return () => { cancelled = true }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weekNumber])
+
+  const handleAddWin = async () => {
+    const text = winInput.trim()
+    if (!text || winSubmitting) return
+    setWinSubmitting(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setWinSubmitting(false); return }
+    const { data, error } = await supabase
+      .from('wins')
+      .insert({ client_id: user.id, content: text, week_number: weekNumber })
+      .select('id, content, created_at')
+      .single()
+    if (!error && data) {
+      setWins(prev => [...prev, data])
+      setWinInput('')
+    }
+    setWinSubmitting(false)
+  }
+
+  // ── To-do du jour ─────────────────────────────────────────────────────────
+  const todayDate = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
+  const [todos, setTodos] = useState<{ id: string; title: string; is_system: boolean; completed_date: string | null }[]>([])
+  const [todosLoading, setTodosLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    async function fetchTodos() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setTodosLoading(false); return }
+      const { data } = await supabase
+        .from('todos')
+        .select('id, title, is_system, completed_date')
+        .eq('client_id', user.id)
+        .order('is_system', { ascending: true })
+        .order('created_at', { ascending: true })
+      if (!cancelled) {
+        setTodos(data ?? [])
+        setTodosLoading(false)
+      }
+    }
+    fetchTodos()
+    return () => { cancelled = true }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const handleToggleTodo = async (todoId: string, currentDate: string | null) => {
+    const newDate = currentDate === todayDate ? null : todayDate
+    setTodos(prev => prev.map(t => t.id === todoId ? { ...t, completed_date: newDate } : t))
+    await supabase.from('todos').update({ completed_date: newDate }).eq('id', todoId)
+  }
+
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/')
@@ -224,6 +302,10 @@ export default function DashboardClient({
   const maxXP          = leaderboard[0]?.xp || 1
   const visionText     = (responses?.vision as string) ?? null
   const objectifText   = (responses?.objectif_principal as string) ?? null
+
+  // ── Habits / Missions split ────────────────────────────────────────────────
+  const habitsOnly     = habits.filter(h => h.category === 'habit')
+  const missions       = habits.filter(h => h.category === 'mission')
 
   // ── Badges (computed from existing data, no DB table) ──────────────────────
   const BADGES: { key: string; label: string; icon: string; earned: boolean; desc: string }[] = [
@@ -308,7 +390,7 @@ export default function DashboardClient({
           70%  { transform: scale(0.92); }
           100% { transform: scale(1); }
         }
-        .glc-habit-row:hover { background: rgba(139,26,26,0.06) !important; }
+        .glc-habit-row:hover { background: rgba(58,134,255,0.06) !important; }
         @keyframes glc-levelup-bg {
           0%   { opacity: 0; }
           15%  { opacity: 1; }
@@ -388,11 +470,11 @@ export default function DashboardClient({
             marginBottom: 14,
           }}>
             <span style={{ ...D, fontWeight: 900, fontSize: '18px', color: 'white', letterSpacing: '0.05em' }}>
-              GLC
+              P180
             </span>
           </div>
           <div style={{ ...D, fontWeight: 700, fontSize: '10px', letterSpacing: '0.25em', color: C.muted, textTransform: 'uppercase' as const }}>
-            Gentleman Létal Club
+            Projet180
           </div>
         </div>
 
@@ -535,7 +617,7 @@ export default function DashboardClient({
           <div style={{ position: 'absolute', top: '-60px', left: '-80px', width: '280px', height: '280px', background: `radial-gradient(circle, ${C.accent}18 0%, transparent 65%)`, pointerEvents: 'none' }} />
           {/* Overline */}
           <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.35em', color: C.accent, textTransform: 'uppercase' as const, marginBottom: 10, position: 'relative' }}>
-            Programme 180j — Gentleman Létal Club
+            Programme 180j — Projet180
           </div>
           {/* Big day number row */}
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: isMobile ? 12 : 20, marginBottom: 16, position: 'relative' }}>
@@ -618,13 +700,13 @@ export default function DashboardClient({
                 Check-in quotidien
               </div>
               {gamification.current_streak > 0 && completed.size === 0 && new Date().getHours() >= 18 && (
-                <div style={{ background: '#1A0A0A', border: '1px solid #8B1A1A', borderRadius: 8, padding: '10px 14px', marginBottom: 12, color: '#E05050', fontSize: 13 }}>
+                <div style={{ background: '#0A101A', border: '1px solid #3A86FF', borderRadius: 8, padding: '10px 14px', marginBottom: 12, color: '#E05050', fontSize: 13 }}>
                   ⚠️ Ta série de {gamification.current_streak}j est en danger — coche tes habitudes avant minuit.
                 </div>
               )}
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
                 <h2 style={{ ...D, fontWeight: 900, fontSize: '20px', letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: C.text, margin: 0, flex: 1 }}>
-                  Missions du jour
+                  Check-in du jour
                 </h2>
                 {/* Mini ring */}
                 <div className={celebrateRing ? 'glc-ring-done' : undefined} style={{ position: 'relative', width: 72, height: 72, flexShrink: 0 }}>
@@ -653,63 +735,133 @@ export default function DashboardClient({
                   ...D, fontWeight: 700, fontSize: '13px', letterSpacing: '0.1em',
                   color: C.muted, textTransform: 'uppercase' as const,
                 }}>
-                  Aucune mission assignée
+                  Aucune habitude assignée
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {habits.map((habit, i) => {
-                    const done    = completed.has(habit.id)
-                    const loading = loadingId === habit.id
-                    return (
-                      <button
-                        key={habit.id}
-                        onClick={() => handleToggle(habit.id)}
-                        disabled={!!loadingId}
-                        className={`glc-slide glc-habit-row`}
-                        style={{
-                          animationDelay: `${i * 55}ms`,
-                          display: 'flex', alignItems: 'center', gap: 20,
-                          background:  done ? `${C.accent}15` : C.surface,
-                          border:      `1px solid ${done ? `${C.accent}40` : C.border}`,
-                          borderLeft:  done ? `3px solid ${C.accent}` : '3px solid transparent',
-                          padding:     '18px 22px',
-                          cursor:      loadingId ? 'wait' : 'pointer',
-                          textAlign:   'left' as const,
-                          opacity:     loading ? 0.6 : 1,
-                          transition:  'background 0.15s, opacity 0.15s',
-                          width:       '100%',
-                        }}
-                      >
-                        <span style={{ ...M, fontSize: '10px', color: C.muted, minWidth: 20 }}>
-                          {String(i + 1).padStart(2, '0')}
-                        </span>
-                        <span style={{
-                          flex: 1,
-                          ...D, fontWeight: 700, fontSize: '14px', letterSpacing: '0.06em',
-                          textTransform: 'uppercase' as const,
-                          color:          done ? C.muted : C.text,
-                          textDecoration: done ? 'line-through' : 'none',
-                        }}>
-                          {habit.name}
-                        </span>
-                        <div style={{
-                          width: 26, height: 26, flexShrink: 0,
-                          border:     `1.5px solid ${done ? C.accent : C.muted}`,
-                          background: done ? C.accent : 'transparent',
-                          boxShadow:  done ? `0 0 10px ${C.accent}70` : 'none',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          transition: 'all 0.15s ease',
-                        }}>
-                          {done && (
-                            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                              <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="square" />
-                            </svg>
-                          )}
-                        </div>
-                      </button>
-                    )
-                  })}
-                </div>
+                <>
+                  {habitsOnly.length > 0 && (
+                    <>
+                      <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.25em', color: C.muted, textTransform: 'uppercase' as const, marginBottom: 6 }}>
+                        Habitudes
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: missions.length > 0 ? 20 : 0 }}>
+                        {habitsOnly.map((habit, i) => {
+                          const done    = completed.has(habit.id)
+                          const loading = loadingId === habit.id
+                          return (
+                            <button
+                              key={habit.id}
+                              onClick={() => handleToggle(habit.id)}
+                              disabled={!!loadingId}
+                              className={`glc-slide glc-habit-row`}
+                              style={{
+                                animationDelay: `${i * 55}ms`,
+                                display: 'flex', alignItems: 'center', gap: 20,
+                                background:  done ? `${C.accent}15` : C.surface,
+                                border:      `1px solid ${done ? `${C.accent}40` : C.border}`,
+                                borderLeft:  done ? `3px solid ${C.accent}` : '3px solid transparent',
+                                padding:     '18px 22px',
+                                cursor:      loadingId ? 'wait' : 'pointer',
+                                textAlign:   'left' as const,
+                                opacity:     loading ? 0.6 : 1,
+                                transition:  'background 0.15s, opacity 0.15s',
+                                width:       '100%',
+                              }}
+                            >
+                              <span style={{ ...M, fontSize: '10px', color: C.muted, minWidth: 20 }}>
+                                {String(i + 1).padStart(2, '0')}
+                              </span>
+                              <span style={{
+                                flex: 1,
+                                ...D, fontWeight: 700, fontSize: '14px', letterSpacing: '0.06em',
+                                textTransform: 'uppercase' as const,
+                                color:          done ? C.muted : C.text,
+                                textDecoration: done ? 'line-through' : 'none',
+                              }}>
+                                {habit.name}
+                              </span>
+                              <div style={{
+                                width: 26, height: 26, flexShrink: 0,
+                                border:     `1.5px solid ${done ? C.accent : C.muted}`,
+                                background: done ? C.accent : 'transparent',
+                                boxShadow:  done ? `0 0 10px ${C.accent}70` : 'none',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                transition: 'all 0.15s ease',
+                              }}>
+                                {done && (
+                                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                                    <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="square" />
+                                  </svg>
+                                )}
+                              </div>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </>
+                  )}
+                  {missions.length > 0 && (
+                    <>
+                      <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.25em', color: C.muted, textTransform: 'uppercase' as const, marginBottom: 6 }}>
+                        Missions
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {missions.map((habit, i) => {
+                          const done    = completed.has(habit.id)
+                          const loading = loadingId === habit.id
+                          return (
+                            <button
+                              key={habit.id}
+                              onClick={() => handleToggle(habit.id)}
+                              disabled={!!loadingId}
+                              className={`glc-slide glc-habit-row`}
+                              style={{
+                                animationDelay: `${i * 55}ms`,
+                                display: 'flex', alignItems: 'center', gap: 20,
+                                background:  done ? `${C.accent}15` : C.surface,
+                                border:      `1px solid ${done ? `${C.accent}40` : C.border}`,
+                                borderLeft:  done ? `3px solid ${C.accent}` : '3px solid transparent',
+                                padding:     '18px 22px',
+                                cursor:      loadingId ? 'wait' : 'pointer',
+                                textAlign:   'left' as const,
+                                opacity:     loading ? 0.6 : 1,
+                                transition:  'background 0.15s, opacity 0.15s',
+                                width:       '100%',
+                              }}
+                            >
+                              <span style={{ ...M, fontSize: '10px', color: C.muted, minWidth: 20 }}>
+                                {String(i + 1).padStart(2, '0')}
+                              </span>
+                              <span style={{
+                                flex: 1,
+                                ...D, fontWeight: 700, fontSize: '14px', letterSpacing: '0.06em',
+                                textTransform: 'uppercase' as const,
+                                color:          done ? C.muted : C.text,
+                                textDecoration: done ? 'line-through' : 'none',
+                              }}>
+                                {habit.name}
+                              </span>
+                              <div style={{
+                                width: 26, height: 26, flexShrink: 0,
+                                border:     `1.5px solid ${done ? C.accent : C.muted}`,
+                                background: done ? C.accent : 'transparent',
+                                boxShadow:  done ? `0 0 10px ${C.accent}70` : 'none',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                transition: 'all 0.15s ease',
+                              }}>
+                                {done && (
+                                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                                    <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="square" />
+                                  </svg>
+                                )}
+                              </div>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </>
+                  )}
+                </>
               )}
             </div>
 
@@ -868,7 +1020,7 @@ export default function DashboardClient({
                     </span>
                   </div>
                   <div style={{ ...D, fontWeight: 500, fontSize: '12px', color: '#4A7A5A', letterSpacing: '0.04em' }}>
-                    Rejoindre la communauté GLC
+                    Rejoindre la communauté Projet180
                   </div>
                 </a>
               )}
@@ -1042,6 +1194,230 @@ export default function DashboardClient({
               )}
             </div>
           )}
+
+        {/* ── Wins de la semaine ───────────────────────────────────────────── */}
+        <div style={{
+          background: C.surface,
+          border: `1px solid ${C.border}`,
+          borderRadius: 16,
+          padding: isMobile ? '20px 16px' : '24px',
+          display: 'flex',
+          flexDirection: 'column' as const,
+          gap: 16,
+        }}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+            <div style={{ ...D, fontWeight: 900, fontSize: 18, textTransform: 'uppercase' as const, letterSpacing: '0.08em', color: C.text }}>
+              Wins
+            </div>
+            <div style={{ ...D, fontWeight: 700, fontSize: 13, textTransform: 'uppercase' as const, letterSpacing: '0.14em', color: C.accent }}>
+              · Semaine {weekNumber}
+            </div>
+          </div>
+
+          {/* Input */}
+          <div style={{ display: 'flex', gap: 10 }}>
+            <input
+              type="text"
+              value={winInput}
+              onChange={e => setWinInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleAddWin() }}
+              placeholder="Ajoute une victoire de la semaine…"
+              maxLength={200}
+              style={{
+                flex: 1,
+                background: C.bg,
+                border: `1px solid ${C.border}`,
+                borderRadius: 8,
+                padding: '10px 14px',
+                color: C.text,
+                fontSize: 14,
+                fontFamily: 'system-ui, sans-serif',
+                outline: 'none',
+              }}
+            />
+            <button
+              onClick={handleAddWin}
+              disabled={winSubmitting || !winInput.trim()}
+              style={{
+                ...D,
+                fontWeight: 900,
+                fontSize: 13,
+                textTransform: 'uppercase' as const,
+                letterSpacing: '0.12em',
+                background: winSubmitting || !winInput.trim() ? C.border : C.accent,
+                color: winSubmitting || !winInput.trim() ? C.muted : '#fff',
+                border: 'none',
+                borderRadius: 8,
+                padding: '10px 18px',
+                cursor: winSubmitting || !winInput.trim() ? 'not-allowed' : 'pointer',
+                transition: 'background 0.15s',
+                whiteSpace: 'nowrap' as const,
+              }}
+            >
+              {winSubmitting ? '…' : 'Ajouter'}
+            </button>
+          </div>
+
+          {/* List */}
+          {winsLoading ? (
+            <div style={{ color: C.muted, fontSize: 13, textAlign: 'center' as const, padding: '8px 0' }}>
+              Chargement…
+            </div>
+          ) : wins.length === 0 ? (
+            <div style={{ color: C.muted, fontSize: 13, textAlign: 'center' as const, padding: '8px 0', fontStyle: 'italic' }}>
+              Aucune victoire cette semaine — encore. Lance-toi.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 8 }}>
+              {wins.map((w, i) => (
+                <div key={w.id} style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 10,
+                  background: C.bg,
+                  borderRadius: 8,
+                  padding: '10px 14px',
+                }}>
+                  <span style={{ ...D, fontWeight: 900, fontSize: 13, color: C.accent, minWidth: 20, paddingTop: 1 }}>
+                    {i + 1}.
+                  </span>
+                  <span style={{ fontSize: 14, color: C.text, lineHeight: 1.5 }}>
+                    {w.content}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── To-do du jour ─────────────────────────────────────────────── */}
+        <div style={{
+          background: C.surface,
+          border: `1px solid ${C.border}`,
+          borderRadius: 16,
+          padding: isMobile ? '20px 16px' : '24px',
+          display: 'flex',
+          flexDirection: 'column' as const,
+          gap: 12,
+        }}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+            <div style={{ width: 3, height: 20, background: C.accent, borderRadius: 2 }} />
+            <span style={{ ...D, fontWeight: 900, fontSize: isMobile ? 15 : 17, letterSpacing: '0.1em',
+              textTransform: 'uppercase' as const, color: C.text }}>
+              To-do du jour
+            </span>
+          </div>
+
+          {todosLoading ? (
+            <div style={{ color: C.muted, fontSize: 13, textAlign: 'center' as const, padding: '8px 0' }}>
+              Chargement…
+            </div>
+          ) : todos.length === 0 ? (
+            <div style={{ color: C.muted, fontSize: 13, textAlign: 'center' as const,
+              padding: '8px 0', fontStyle: 'italic' }}>
+              Aucune to-do assignée.
+            </div>
+          ) : (
+            <>
+              {/* Custom todos */}
+              {todos.filter(t => !t.is_system).length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 6,
+                  marginBottom: todos.some(t => t.is_system) ? 16 : 0 }}>
+                  {todos.filter(t => !t.is_system).map((todo, i) => {
+                    const done = todo.completed_date === todayDate
+                    return (
+                      <button key={todo.id} onClick={() => handleToggleTodo(todo.id, todo.completed_date)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 20,
+                          background: done ? `${C.accent}15` : C.bg,
+                          border: `1px solid ${done ? `${C.accent}40` : C.border}`,
+                          borderLeft: done ? `3px solid ${C.accent}` : '3px solid transparent',
+                          borderRadius: 0,
+                          padding: '14px 18px',
+                          cursor: 'pointer',
+                          textAlign: 'left' as const,
+                          transition: 'background 0.15s',
+                          width: '100%',
+                        }}>
+                        <span style={{ ...M, fontSize: '10px', color: C.muted, minWidth: 20 }}>
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        <span style={{ flex: 1, ...D, fontWeight: 700, fontSize: '14px',
+                          letterSpacing: '0.06em', textTransform: 'uppercase' as const,
+                          color: done ? C.muted : C.text,
+                          textDecoration: done ? 'line-through' : 'none' }}>
+                          {todo.title}
+                        </span>
+                        <div style={{ width: 26, height: 26, flexShrink: 0,
+                          border: `1.5px solid ${done ? C.accent : C.muted}`,
+                          background: done ? C.accent : 'transparent',
+                          boxShadow: done ? `0 0 10px ${C.accent}70` : 'none',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          transition: 'all 0.15s ease' }}>
+                          {done && <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                            <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="square" />
+                          </svg>}
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+
+              {/* System todos */}
+              {todos.some(t => t.is_system) && (
+                <>
+                  <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.25em',
+                    color: C.muted, textTransform: 'uppercase' as const, marginBottom: 4 }}>
+                    Quotidien
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 6 }}>
+                    {todos.filter(t => t.is_system).map((todo, i) => {
+                      const done = todo.completed_date === todayDate
+                      return (
+                        <button key={todo.id} onClick={() => handleToggleTodo(todo.id, todo.completed_date)}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 20,
+                            background: done ? `${C.accent}10` : C.surface,
+                            border: `1px solid ${done ? `${C.accent}30` : C.border}`,
+                            borderLeft: done ? `3px solid ${C.accent}80` : `3px solid ${C.border}`,
+                            borderRadius: 0,
+                            padding: '14px 18px',
+                            cursor: 'pointer',
+                            textAlign: 'left' as const,
+                            transition: 'background 0.15s',
+                            width: '100%',
+                            opacity: 0.85,
+                          }}>
+                          <span style={{ ...M, fontSize: '10px', color: C.muted, minWidth: 20 }}>
+                            {String(i + 1).padStart(2, '0')}
+                          </span>
+                          <span style={{ flex: 1, ...D, fontWeight: 700, fontSize: '13px',
+                            letterSpacing: '0.05em', textTransform: 'uppercase' as const,
+                            color: done ? C.muted : `${C.text}99`,
+                            textDecoration: done ? 'line-through' : 'none' }}>
+                            {todo.title}
+                          </span>
+                          <div style={{ width: 24, height: 24, flexShrink: 0,
+                            border: `1.5px solid ${done ? `${C.accent}80` : C.muted}`,
+                            background: done ? `${C.accent}80` : 'transparent',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            transition: 'all 0.15s ease' }}>
+                            {done && <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                              <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="square" />
+                            </svg>}
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </div>
 
         </div>
 

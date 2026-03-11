@@ -28,24 +28,34 @@ interface Habit {
   id: string
   client_id: string
   name: string
+  category: string
   is_active: boolean
   sort_order: number
   created_at: string
 }
 
-type Tab = 'clients' | 'missions' | 'configuration'
+interface Todo {
+  id: string
+  client_id: string
+  title: string
+  is_system: boolean
+  completed_date: string | null
+  created_at: string
+}
+
+type Tab = 'clients' | 'missions' | 'todos' | 'configuration'
 
 function InitialsBadge({ firstName, lastName }: { firstName: string; lastName: string }) {
   const initials = `${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase()
   return (
     <div style={{
       width: 34, height: 34, borderRadius: 8,
-      background: 'linear-gradient(135deg, #1A0808 0%, #2A0A0A 100%)',
-      border: '1px solid #3A1010',
+      background: 'linear-gradient(135deg, #080A1A 0%, #0A0F2A 100%)',
+      border: '1px solid #0A1A3A',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       flexShrink: 0,
       fontFamily: 'var(--font-barlow, "Barlow Condensed", sans-serif)',
-      fontWeight: 800, fontSize: 13, color: '#8B1A1A', letterSpacing: '0.04em',
+      fontWeight: 800, fontSize: 13, color: '#3A86FF', letterSpacing: '0.04em',
     }}>
       {initials || '?'}
     </div>
@@ -80,8 +90,16 @@ export default function AdminPage() {
   const [habits, setHabits] = useState<Habit[]>([])
   const [loadingHabits, setLoadingHabits] = useState(false)
   const [newHabitName, setNewHabitName] = useState('')
+  const [newHabitCategory, setNewHabitCategory] = useState<'habit' | 'mission'>('habit')
   const [addingHabit, setAddingHabit] = useState(false)
   const [habitErr, setHabitErr] = useState<string | null>(null)
+
+  // — Todos —
+  const [todos, setTodos] = useState<Todo[]>([])
+  const [loadingTodos, setLoadingTodos] = useState(false)
+  const [newTodoTitle, setNewTodoTitle] = useState('')
+  const [addingTodo, setAddingTodo] = useState(false)
+  const [todoErr, setTodoErr] = useState<string | null>(null)
 
   // ────────── Load settings ──────────
   useEffect(() => {
@@ -125,6 +143,20 @@ export default function AdminPage() {
   }, [])
 
   useEffect(() => { loadHabits(selectedClientId) }, [selectedClientId, loadHabits])
+
+  // ────────── Load todos for selected client ──────────
+  const loadTodos = useCallback(async (clientId: string) => {
+    if (!clientId) { setTodos([]); return }
+    setLoadingTodos(true)
+    const res = await fetch(`/api/admin/todos?clientId=${clientId}`)
+    if (res.ok) {
+      const json = await res.json()
+      setTodos(json.todos ?? [])
+    }
+    setLoadingTodos(false)
+  }, [])
+
+  useEffect(() => { loadTodos(selectedClientId) }, [selectedClientId, loadTodos])
 
   // ────────── Settings save ──────────
   async function handleSaveSettings(e: React.FormEvent) {
@@ -184,7 +216,7 @@ export default function AdminPage() {
     const res = await fetch('/api/admin/habits', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ client_id: selectedClientId, name: newHabitName }),
+      body: JSON.stringify({ client_id: selectedClientId, name: newHabitName, category: newHabitCategory }),
     })
     const json = await res.json()
     if (!res.ok) {
@@ -217,6 +249,35 @@ export default function AdminPage() {
     }
   }
 
+  // ────────── Add todo ──────────
+  async function handleAddTodo(e: React.FormEvent) {
+    e.preventDefault()
+    if (!selectedClientId || !newTodoTitle.trim()) return
+    setAddingTodo(true)
+    setTodoErr(null)
+    const res = await fetch('/api/admin/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_id: selectedClientId, title: newTodoTitle.trim() }),
+    })
+    const json = await res.json()
+    if (!res.ok) {
+      setTodoErr(json.error ?? 'Erreur lors de la création.')
+    } else {
+      setNewTodoTitle('')
+      setTodos(prev => [...prev, json.todo])
+    }
+    setAddingTodo(false)
+  }
+
+  // ────────── Delete todo ──────────
+  async function handleDeleteTodo(id: string) {
+    const res = await fetch(`/api/admin/todos?id=${id}`, { method: 'DELETE' })
+    if (res.ok) {
+      setTodos(prev => prev.filter(t => t.id !== id))
+    }
+  }
+
   // ────────── Loading screen ──────────
   if (loadingSettings) {
     return (
@@ -225,9 +286,9 @@ export default function AdminPage() {
           <div style={{
             fontFamily: 'var(--font-barlow, "Barlow Condensed", sans-serif)',
             fontWeight: 900, fontSize: 28, letterSpacing: '0.3em',
-            background: 'linear-gradient(135deg, #8B1A1A, #C04040)',
+            background: 'linear-gradient(135deg, #3A86FF, #6098FF)',
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          }}>GLC</div>
+          }}>P180</div>
           <div style={{ color: '#484848', fontSize: 11, letterSpacing: '0.15em', textTransform: 'uppercase', animation: 'pulse 2s infinite' }}>
             Chargement…
           </div>
@@ -251,6 +312,7 @@ export default function AdminPage() {
   const tabs: { key: Tab; label: string }[] = [
     { key: 'clients', label: 'Clients' },
     { key: 'missions', label: 'Missions' },
+    { key: 'todos', label: 'To-do' },
     { key: 'configuration', label: 'Config' },
   ]
 
@@ -267,7 +329,7 @@ export default function AdminPage() {
       {/* Radial glow top */}
       <div style={{
         position: 'fixed', inset: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(139,26,26,0.13) 0%, transparent 65%)',
+        background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(58,134,255,0.13) 0%, transparent 65%)',
         zIndex: 0,
       }} />
 
@@ -283,9 +345,9 @@ export default function AdminPage() {
             <div>
               <div style={{
                 fontSize: 10, fontWeight: 800, letterSpacing: '0.35em',
-                textTransform: 'uppercase', color: '#8B1A1A', marginBottom: 4,
+                textTransform: 'uppercase', color: '#3A86FF', marginBottom: 4,
               }}>
-                Gentleman Létal Club — Admin
+                Projet180 — Admin
               </div>
               <h1 style={{
                 fontFamily: 'var(--font-barlow, "Barlow Condensed", sans-serif)',
@@ -351,7 +413,7 @@ export default function AdminPage() {
               {activeTab === tab.key && (
                 <span style={{
                   position: 'absolute', bottom: 0, left: 0, right: 0,
-                  height: 2, background: '#8B1A1A', borderRadius: '2px 2px 0 0',
+                  height: 2, background: '#3A86FF', borderRadius: '2px 2px 0 0',
                 }} />
               )}
             </button>
@@ -385,7 +447,7 @@ export default function AdminPage() {
                 </div>
               ) : clients.length === 0 ? (
                 <div style={{ padding: '48px 20px', textAlign: 'center' }}>
-                  <div style={{ color: '#8B1A1A', fontSize: 28, marginBottom: 10 }}>0</div>
+                  <div style={{ color: '#3A86FF', fontSize: 28, marginBottom: 10 }}>0</div>
                   <div style={{ color: '#484848', fontSize: 13 }}>Aucun client pour l&apos;instant.</div>
                 </div>
               ) : (
@@ -419,9 +481,9 @@ export default function AdminPage() {
                           {c.jourX > 0 && (
                             <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 7 }}>
                               <div style={{ flex: 1, height: 3, borderRadius: 2, background: '#1E1E1E', overflow: 'hidden', maxWidth: 120 }}>
-                                <div style={{ height: '100%', borderRadius: 2, background: '#8B1A1A', width: `${progress}%` }} />
+                                <div style={{ height: '100%', borderRadius: 2, background: '#3A86FF', width: `${progress}%` }} />
                               </div>
-                              <span style={{ fontSize: 10, color: '#8B1A1A', fontWeight: 700, letterSpacing: '0.05em' }}>
+                              <span style={{ fontSize: 10, color: '#3A86FF', fontWeight: 700, letterSpacing: '0.05em' }}>
                                 J{c.jourX}/180
                               </span>
                             </div>
@@ -439,11 +501,11 @@ export default function AdminPage() {
                         {/* Level */}
                         <div style={{
                           padding: '3px 10px', borderRadius: 6,
-                          background: 'rgba(139,26,26,0.15)',
-                          border: '1px solid rgba(139,26,26,0.3)',
+                          background: 'rgba(58,134,255,0.15)',
+                          border: '1px solid rgba(58,134,255,0.3)',
                           fontSize: 10, fontWeight: 800,
                           letterSpacing: '0.12em', textTransform: 'uppercase',
-                          color: '#C04040', whiteSpace: 'nowrap',
+                          color: '#6098FF', whiteSpace: 'nowrap',
                         }}>
                           {c.level || 'N/A'}
                         </div>
@@ -497,9 +559,9 @@ export default function AdminPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{
                     width: 24, height: 24, borderRadius: 6,
-                    background: 'rgba(139,26,26,0.15)', border: '1px solid rgba(139,26,26,0.25)',
+                    background: 'rgba(58,134,255,0.15)', border: '1px solid rgba(58,134,255,0.25)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 14, color: '#8B1A1A', fontWeight: 800,
+                    fontSize: 14, color: '#3A86FF', fontWeight: 800,
                   }}>+</div>
                   <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#484848' }}>
                     Ajouter un client manuellement
@@ -551,7 +613,7 @@ export default function AdminPage() {
                       disabled={addingClient}
                       style={{
                         padding: '10px 22px', borderRadius: 10,
-                        background: addingClient ? '#3A1010' : '#8B1A1A',
+                        background: addingClient ? '#0A1A3A' : '#3A86FF',
                         border: 'none', cursor: addingClient ? 'not-allowed' : 'pointer',
                         fontSize: 11, fontWeight: 700, letterSpacing: '0.18em',
                         textTransform: 'uppercase', color: '#FFFFFF',
@@ -596,14 +658,14 @@ export default function AdminPage() {
                   <div style={{
                     display: 'flex', alignItems: 'center', gap: 10,
                     padding: '10px 14px', borderRadius: 10,
-                    background: 'rgba(139,26,26,0.08)', border: '1px solid rgba(139,26,26,0.2)',
+                    background: 'rgba(58,134,255,0.08)', border: '1px solid rgba(58,134,255,0.2)',
                   }}>
                     <InitialsBadge firstName={selectedClient?.first_name ?? ''} lastName={selectedClient?.last_name ?? ''} />
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#F5F5F5' }}>
                         {selectedClient?.first_name} {selectedClient?.last_name}
                       </div>
-                      <div style={{ fontSize: 10, color: '#8B1A1A', letterSpacing: '0.1em', fontWeight: 700 }}>
+                      <div style={{ fontSize: 10, color: '#3A86FF', letterSpacing: '0.1em', fontWeight: 700 }}>
                         {habits.filter(h => h.is_active).length} mission{habits.filter(h => h.is_active).length !== 1 ? 's' : ''} active{habits.filter(h => h.is_active).length !== 1 ? 's' : ''}
                       </div>
                     </div>
@@ -613,18 +675,30 @@ export default function AdminPage() {
                   <form onSubmit={handleAddHabit} style={{ display: 'flex', gap: 10 }}>
                     <input
                       type="text"
-                      placeholder="Nom de la mission (ex : Froid 3 min)"
+                      placeholder="Nom (ex : Froid 3 min, Lire 20 pages…)"
                       value={newHabitName}
                       onChange={e => setNewHabitName(e.target.value)}
                       required
                       style={{ ...inputStyle, flex: 1 }}
                     />
+                    <select
+                      value={newHabitCategory}
+                      onChange={e => setNewHabitCategory(e.target.value as 'habit' | 'mission')}
+                      style={{
+                        ...inputStyle,
+                        width: 120, flexShrink: 0, cursor: 'pointer',
+                        paddingRight: 10,
+                      }}
+                    >
+                      <option value="habit">Habitude</option>
+                      <option value="mission">Mission</option>
+                    </select>
                     <button
                       type="submit"
                       disabled={addingHabit || !newHabitName.trim()}
                       style={{
                         padding: '10px 18px', borderRadius: 10,
-                        background: '#8B1A1A', border: 'none',
+                        background: '#3A86FF', border: 'none',
                         cursor: addingHabit || !newHabitName.trim() ? 'not-allowed' : 'pointer',
                         fontSize: 12, fontWeight: 700, letterSpacing: '0.12em',
                         textTransform: 'uppercase', color: '#FFFFFF',
@@ -632,7 +706,7 @@ export default function AdminPage() {
                         transition: 'all 0.15s', whiteSpace: 'nowrap',
                       }}
                     >
-                      {addingHabit ? 'Ajout…' : '+ Mission'}
+                      {addingHabit ? 'Ajout…' : '+ Ajouter'}
                     </button>
                   </form>
 
@@ -658,8 +732,8 @@ export default function AdminPage() {
                           style={{
                             display: 'flex', alignItems: 'center', gap: 12,
                             padding: '12px 14px', borderRadius: 10,
-                            border: `1px solid ${habit.is_active ? 'rgba(139,26,26,0.25)' : '#1A1A1A'}`,
-                            background: habit.is_active ? 'rgba(139,26,26,0.04)' : '#080808',
+                            border: `1px solid ${habit.is_active ? 'rgba(58,134,255,0.25)' : '#1A1A1A'}`,
+                            background: habit.is_active ? 'rgba(58,134,255,0.04)' : '#080808',
                           }}
                         >
                           {/* Order indicator */}
@@ -673,14 +747,25 @@ export default function AdminPage() {
                           }}>
                             {habit.name}
                           </span>
+                          <span style={{
+                            padding: '2px 8px', borderRadius: 5, fontSize: 10, fontWeight: 700,
+                            letterSpacing: '0.08em', textTransform: 'uppercase', flexShrink: 0,
+                            background: habit.category === 'mission'
+                              ? 'rgba(255, 160, 50, 0.12)'
+                              : 'rgba(58, 134, 255, 0.12)',
+                            color: habit.category === 'mission' ? '#FFA032' : '#6098FF',
+                            border: `1px solid ${habit.category === 'mission' ? 'rgba(255,160,50,0.25)' : 'rgba(58,134,255,0.25)'}`,
+                          }}>
+                            {habit.category === 'mission' ? 'Mission' : 'Habitude'}
+                          </span>
                           <button
                             onClick={() => handleToggleHabit(habit)}
                             style={{
                               padding: '4px 12px', borderRadius: 6, border: 'none',
                               cursor: 'pointer', fontSize: 10, fontWeight: 700,
                               letterSpacing: '0.1em', textTransform: 'uppercase',
-                              background: habit.is_active ? 'rgba(139,26,26,0.2)' : '#1E1E1E',
-                              color: habit.is_active ? '#C04040' : '#484848',
+                              background: habit.is_active ? 'rgba(58,134,255,0.2)' : '#1E1E1E',
+                              color: habit.is_active ? '#6098FF' : '#484848',
                               transition: 'all 0.15s',
                             }}
                           >
@@ -714,6 +799,187 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+
+        {/* ══ Tab: To-do ══ */}
+        {activeTab === 'todos' && (() => {
+          const today = new Date().toISOString().slice(0, 10)
+          const systemTodos = todos.filter(t => t.is_system)
+          const customTodos = todos.filter(t => !t.is_system)
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ borderRadius: 14, border: '1px solid #1E1E1E', background: '#0F0F0F', overflow: 'hidden' }}>
+                {/* Client selector */}
+                <div style={{ padding: '20px', borderBottom: '1px solid #1E1E1E' }}>
+                  <label style={{ display: 'block', fontSize: 10, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#484848', marginBottom: 8 }}>
+                    Client
+                  </label>
+                  <select
+                    value={selectedClientId}
+                    onChange={e => setSelectedClientId(e.target.value)}
+                    style={{ ...inputStyle, cursor: 'pointer' }}
+                  >
+                    <option value="">— Choisir un client —</option>
+                    {clients.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.first_name} {c.last_name} ({c.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {selectedClientId ? (
+                  <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+                    {/* Client banner */}
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '10px 14px', borderRadius: 10,
+                      background: 'rgba(58,134,255,0.08)', border: '1px solid rgba(58,134,255,0.2)',
+                    }}>
+                      <InitialsBadge firstName={selectedClient?.first_name ?? ''} lastName={selectedClient?.last_name ?? ''} />
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: '#F5F5F5' }}>
+                          {selectedClient?.first_name} {selectedClient?.last_name}
+                        </div>
+                        <div style={{ fontSize: 10, color: '#3A86FF', letterSpacing: '0.1em', fontWeight: 700 }}>
+                          {todos.length} to-do{todos.length !== 1 ? 's' : ''}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* System todos — completion status */}
+                    {systemTodos.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#484848', marginBottom: 10 }}>
+                          To-do système (quotidiennes)
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {systemTodos.map(todo => {
+                            const doneToday = todo.completed_date === today
+                            return (
+                              <div
+                                key={todo.id}
+                                style={{
+                                  display: 'flex', alignItems: 'center', gap: 12,
+                                  padding: '12px 14px', borderRadius: 10,
+                                  border: `1px solid ${doneToday ? 'rgba(34,197,94,0.25)' : '#1A1A1A'}`,
+                                  background: doneToday ? 'rgba(34,197,94,0.05)' : '#080808',
+                                }}
+                              >
+                                <div style={{
+                                  width: 18, height: 18, borderRadius: 5, flexShrink: 0,
+                                  border: `2px solid ${doneToday ? '#22c55e' : '#333'}`,
+                                  background: doneToday ? '#22c55e' : 'transparent',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                  {doneToday && (
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#060606" strokeWidth={3}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  )}
+                                </div>
+                                <span style={{ flex: 1, fontSize: 13, color: doneToday ? '#F5F5F5' : '#484848' }}>
+                                  {todo.title}
+                                </span>
+                                <span style={{
+                                  fontSize: 9, fontWeight: 800, letterSpacing: '0.15em',
+                                  textTransform: 'uppercase', padding: '3px 8px', borderRadius: 5,
+                                  background: doneToday ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.04)',
+                                  color: doneToday ? '#22c55e' : '#333',
+                                }}>
+                                  {doneToday ? 'Fait aujourd\'hui' : 'Non fait'}
+                                </span>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Custom todos */}
+                    <div>
+                      <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#484848', marginBottom: 10 }}>
+                        To-do personnalisées
+                      </div>
+
+                      {/* Add todo form */}
+                      <form onSubmit={handleAddTodo} style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+                        <input
+                          type="text"
+                          placeholder="Titre de la to-do (ex : Lire 20 min ce soir)"
+                          value={newTodoTitle}
+                          onChange={e => setNewTodoTitle(e.target.value)}
+                          required
+                          style={{ ...inputStyle, flex: 1 }}
+                        />
+                        <button
+                          type="submit"
+                          disabled={addingTodo || !newTodoTitle.trim()}
+                          style={{
+                            padding: '10px 18px', borderRadius: 10,
+                            background: '#3A86FF', border: 'none',
+                            cursor: addingTodo || !newTodoTitle.trim() ? 'not-allowed' : 'pointer',
+                            fontSize: 12, fontWeight: 700, letterSpacing: '0.12em',
+                            textTransform: 'uppercase', color: '#FFFFFF',
+                            opacity: addingTodo || !newTodoTitle.trim() ? 0.5 : 1,
+                            transition: 'all 0.15s', whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {addingTodo ? 'Ajout…' : '+ To-do'}
+                        </button>
+                      </form>
+
+                      {todoErr && (
+                        <div style={{ fontSize: 13, color: '#f97373', background: '#1a0000', border: '1px solid #7f1d1d', borderRadius: 10, padding: '10px 14px', marginBottom: 10 }}>{todoErr}</div>
+                      )}
+
+                      {loadingTodos ? (
+                        <div style={{ padding: '24px', textAlign: 'center', color: '#484848', fontSize: 13 }}>Chargement…</div>
+                      ) : customTodos.length === 0 ? (
+                        <div style={{ padding: '24px', textAlign: 'center', color: '#333', fontSize: 13 }}>
+                          Aucune to-do personnalisée.<br />
+                          <span style={{ fontSize: 11 }}>Ajoute une to-do spécifique pour ce client.</span>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {customTodos.map(todo => (
+                            <div
+                              key={todo.id}
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: 12,
+                                padding: '12px 14px', borderRadius: 10,
+                                border: '1px solid #1A1A1A', background: '#080808',
+                              }}
+                            >
+                              <span style={{ flex: 1, fontSize: 13, color: '#F5F5F5' }}>{todo.title}</span>
+                              <button
+                                onClick={() => handleDeleteTodo(todo.id)}
+                                title="Supprimer"
+                                style={{
+                                  width: 28, height: 28, borderRadius: 7, border: '1px solid transparent',
+                                  background: 'transparent', cursor: 'pointer',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  color: '#333', transition: 'all 0.15s', flexShrink: 0,
+                                }}
+                              >
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ padding: '40px 20px', textAlign: 'center', color: '#484848', fontSize: 13 }}>
+                    Sélectionne un client pour gérer ses to-dos.
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })()}
 
         {/* ══ Tab: Configuration ══ */}
         {activeTab === 'configuration' && (
@@ -763,7 +1029,7 @@ export default function AdminPage() {
                 disabled={savingSettings}
                 style={{
                   padding: '11px 28px', borderRadius: 10,
-                  background: savingSettings ? '#3A1010' : '#8B1A1A',
+                  background: savingSettings ? '#0A1A3A' : '#3A86FF',
                   border: 'none', cursor: savingSettings ? 'not-allowed' : 'pointer',
                   fontSize: 11, fontWeight: 700, letterSpacing: '0.18em',
                   textTransform: 'uppercase', color: '#FFFFFF',

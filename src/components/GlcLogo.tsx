@@ -5,43 +5,23 @@ interface GlcLogoProps {
   showText?: boolean
 }
 
-const SIZES = {
-  sm: { container: 32, font: 13 },
-  md: { container: 44, font: 18 },
-  lg: { container: 60, font: 24 },
-  xl: { container: 120, font: 32 },
+// Widths pour une image 1280×356 (ratio ~3.6:1)
+const WIDTHS = {
+  sm: 80,
+  md: 140,
+  lg: 180,
+  xl: 240,
 }
 
-export default function GlcLogo({ size = 'md', showText = false }: GlcLogoProps) {
-  const { container, font } = SIZES[size]
+export default function GlcLogo({ size = 'md' }: GlcLogoProps) {
+  const width = WIDTHS[size]
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <img
-        src="/logo.jpg"
-        alt="GLC"
-        width={container}
-        height={container}
-        style={{
-          borderRadius: size === 'xl' ? 16 : 8,
-          flexShrink: 0,
-          display: 'block',
-        }}
-      />
-      {showText && (
-        <span
-          style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 700,
-            fontSize: font * 0.9,
-            color: '#F2F2F5',
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase',
-          }}
-        >
-          Gentleman Létal Club
-        </span>
-      )}
-    </div>
+    <img
+      src="/logo-projet180.png"
+      alt="Projet180"
+      width={width}
+      style={{ height: 'auto', display: 'block', flexShrink: 0 }}
+    />
   )
 }

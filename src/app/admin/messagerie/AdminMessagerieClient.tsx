@@ -14,8 +14,8 @@ const C = {
   muted:   '#484848',
   dimmed:  '#161616',
   text:    '#F0F0F0',
-  accent:  '#8B1A1A',
-  accentL: '#A32020',
+  accent:  '#3A86FF',
+  accentL: '#2B75EE',
   gold:    '#C9A84C',
 }
 const D = { fontFamily: '"Barlow Condensed", sans-serif' } as const
@@ -222,7 +222,7 @@ export default function AdminMessagerieClient({ adminId, convos: initialConvos }
                 width: 32, height: 32, background: C.accent,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <span style={{ ...D, fontWeight: 900, fontSize: '12px', color: 'white', letterSpacing: '0.05em' }}>GLC</span>
+                <span style={{ ...D, fontWeight: 900, fontSize: '12px', color: 'white', letterSpacing: '0.05em' }}>P180</span>
               </div>
               <div>
                 <div style={{ ...D, fontWeight: 900, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: C.muted }}>

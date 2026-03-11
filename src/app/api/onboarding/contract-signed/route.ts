@@ -39,15 +39,15 @@ export async function POST() {
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        sender: { name: 'GLC App', email: 'noreply@gentlemanletal.club' },
+        sender: { name: 'Projet180', email: 'noreply@gentlemanletal.club' },
         to: [{ email: coachEmail, name: 'Robin' }],
         subject: `${clientName} vient de signer son contrat`,
         htmlContent: `
           <div style="font-family: -apple-system, sans-serif; max-width: 500px; margin: 0 auto; color: #F2F2F5; background: #060606; padding: 40px 30px; border-radius: 16px;">
-            <p style="color: #8B1A1A; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">Contrat signé</p>
+            <p style="color: #3A86FF; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">Contrat signé</p>
             <h1 style="font-size: 22px; margin-bottom: 16px;">${clientName} a signé.</h1>
             <p style="color: #888; line-height: 1.7;">
-              Ton client vient de lire et signer son contrat d'engagement dans GLC.
+              Ton client vient de lire et signer son contrat d'engagement dans Projet180.
             </p>
             <div style="background: #0F0F0F; border: 1px solid #1E1E1E; border-radius: 12px; padding: 20px; margin: 24px 0;">
               <p style="margin: 0 0 4px; color: #484848; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Client</p>
@@ -60,7 +60,7 @@ export async function POST() {
               <p style="margin: 0; color: #F2F2F5; font-size: 14px;">${signedAt} (Paris)</p>
             </div>
             <p style="color: #484848; font-size: 13px; margin-top: 32px;">
-              — GLC App
+              — Projet180
             </p>
           </div>
         `,

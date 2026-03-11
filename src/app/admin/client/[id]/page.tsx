@@ -10,22 +10,22 @@ const S = {
   muted:   '#484848',
   label:   '#888888',
   text:    '#F5F5F5',
-  accent:  '#8B1A1A',
+  accent:  '#3A86FF',
 } as const
 const D = { fontFamily: '"Barlow Condensed", sans-serif' } as const
 const M = { fontFamily: '"JetBrains Mono", monospace' }    as const
 
 // ─── Level system ─────────────────────────────────────────────────────────────
 const LEVELS = [
-  { name: 'Initié',           min: 0     },
-  { name: 'Soldat',           min: 500   },
-  { name: 'Guerrier',         min: 1500  },
-  { name: 'Combattant',       min: 3000  },
-  { name: "Homme d'honneur",  min: 6000  },
-  { name: 'Gentleman Létal',  min: 12000 },
+  { name: 'Recrue',    min: 0     },
+  { name: 'Aspirant',  min: 500   },
+  { name: 'Disciple',  min: 1500  },
+  { name: 'Initié',    min: 3000  },
+  { name: 'Élite',     min: 6000  },
+  { name: 'ÉLITE MAX', min: 12000 },
 ]
 function getLevelName(xp: number) {
-  return [...LEVELS].reverse().find(l => xp >= l.min)?.name ?? 'Initié'
+  return [...LEVELS].reverse().find(l => xp >= l.min)?.name ?? 'Recrue'
 }
 
 // ─── Questionnaire sections ────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ const SECTIONS = [
       { key: 'job',        label: 'Profession' },
       { key: 'income',     label: 'Revenus actuels' },
       { key: 'how_found',  label: 'Comment nous avez-vous trouvé ?' },
-      { key: 'why_us',     label: 'Pourquoi GLC ?' },
+      { key: 'why_us',     label: 'Pourquoi Projet180 ?' },
     ],
   },
   {

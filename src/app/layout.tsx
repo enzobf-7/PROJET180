@@ -15,7 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Gentleman Létal Club",
+  title: "Projet180",
   description: "Programme de coaching 180 jours par Robin Duplouis",
 };
 

@@ -102,19 +102,19 @@ export async function toggleHabitAction(
 
   // ── 5. Calcul du niveau ───────────────────────────────────────────────────
   const LEVELS = [
-    { name: 'Initié',          min: 0,     max: 500   },
-    { name: 'Soldat',          min: 500,   max: 1500  },
-    { name: 'Guerrier',        min: 1500,  max: 3000  },
-    { name: 'Combattant',      min: 3000,  max: 6000  },
-    { name: "Homme d'honneur", min: 6000,  max: 12000 },
-    { name: 'Gentleman Létal', min: 12000, max: Infinity },
+    { name: 'Recrue',    min: 0,     max: 500   },
+    { name: 'Aspirant',  min: 500,   max: 1500  },
+    { name: 'Disciple',  min: 1500,  max: 3000  },
+    { name: 'Initié',    min: 3000,  max: 6000  },
+    { name: 'Élite',     min: 6000,  max: 12000 },
+    { name: 'ÉLITE MAX', min: 12000, max: Infinity },
   ]
   const getLevel = (xp: number) => {
     const idx = LEVELS.findIndex(l => xp >= l.min && xp < l.max)
     return idx >= 0 ? idx + 1 : LEVELS.length
   }
   const newLevelIdx  = getLevel(newXP)
-  const newLevelName = LEVELS[newLevelIdx - 1]?.name ?? 'Gentleman Létal'
+  const newLevelName = LEVELS[newLevelIdx - 1]?.name ?? 'ÉLITE MAX'
   const leveledUp    = completing && newLevelIdx > currentLevel
 
   // ── 6. Persister dans gamification ───────────────────────────────────────

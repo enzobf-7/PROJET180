@@ -34,7 +34,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,26,26,0.1)_0%,transparent_70%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(58,134,255,0.1)_0%,transparent_70%)]" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-glc-accent/4 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="w-full max-w-[360px] relative z-10 animate-fade-in">
@@ -44,7 +44,7 @@ export default function LoginPage() {
             <GlcLogo size="xl" />
           </div>
           <h1 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '1.5rem', letterSpacing: '0.06em', color: '#F2F2F5', textTransform: 'uppercase', marginBottom: 6, whiteSpace: 'nowrap' }}>
-            Gentleman Létal Club
+            Projet180
           </h1>
           <p style={{ fontSize: '0.8rem', color: '#888', letterSpacing: '0.03em' }}>
             180 jours pour changer ta vie
@@ -75,7 +75,7 @@ export default function LoginPage() {
             />
 
             {error && (
-              <div className="text-[#ff6b6b] text-sm bg-[rgba(139,26,26,0.12)] border border-[rgba(139,26,26,0.25)] rounded-xl px-4 py-3">
+              <div className="text-[#ff6b6b] text-sm bg-[rgba(220,38,38,0.12)] border border-[rgba(220,38,38,0.25)] rounded-xl px-4 py-3">
                 {error}
               </div>
             )}

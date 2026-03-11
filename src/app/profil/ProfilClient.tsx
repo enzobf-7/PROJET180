@@ -14,7 +14,7 @@ const C = {
   muted:   '#484848',
   dimmed:  '#1E1E1E',
   text:    '#F2F2F5',
-  accent:  '#8B1A1A',
+  accent:  '#3A86FF',
   gold:    '#C9A84C',
   green:   '#22C55E',
 }
@@ -48,12 +48,12 @@ interface Props {
 
 // ─── Level system ─────────────────────────────────────────────────────────────
 const LEVELS = [
-  { name: 'Initié',          min: 0,     max: 500   },
-  { name: 'Soldat',          min: 500,   max: 1500  },
-  { name: 'Guerrier',        min: 1500,  max: 3000  },
-  { name: 'Combattant',      min: 3000,  max: 6000  },
-  { name: "Homme d'honneur", min: 6000,  max: 12000 },
-  { name: 'Gentleman Létal', min: 12000, max: Infinity },
+  { name: 'Recrue',    min: 0,     max: 500   },
+  { name: 'Aspirant',  min: 500,   max: 1500  },
+  { name: 'Disciple',  min: 1500,  max: 3000  },
+  { name: 'Initié',    min: 3000,  max: 6000  },
+  { name: 'Élite',     min: 6000,  max: 12000 },
+  { name: 'ÉLITE MAX', min: 12000, max: Infinity },
 ]
 
 function getCurrentLevel(xp: number) {
@@ -76,7 +76,7 @@ const SECTIONS = [
       { key: 'job',         label: 'Profession' },
       { key: 'income',      label: 'Revenus actuels' },
       { key: 'how_found',   label: 'Comment nous avez-vous trouvé ?' },
-      { key: 'why_us',      label: 'Pourquoi GLC ?' },
+      { key: 'why_us',      label: 'Pourquoi Projet180 ?' },
     ],
   },
   {

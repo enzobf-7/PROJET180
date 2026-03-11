@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
   const query = admin
     .from('habits')
-    .select('id, client_id, name, is_active, sort_order, created_at')
+    .select('id, client_id, name, category, is_active, sort_order, created_at')
     .order('sort_order', { ascending: true })
 
   if (clientId) {
@@ -35,18 +35,20 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ habits: data ?? [] })
 }
 
-// POST /api/admin/habits  — body: { client_id, name }
+// POST /api/admin/habits  — body: { client_id, name, category? }
 export async function POST(request: NextRequest) {
   const auth = await checkAdminAuth()
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { admin } = auth
   const body = await request.json()
-  const { client_id, name } = body
+  const { client_id, name, category } = body
 
   if (!client_id || !name?.trim()) {
     return NextResponse.json({ error: 'client_id et nom requis.' }, { status: 400 })
   }
+
+  const resolvedCategory = category === 'mission' ? 'mission' : 'habit'
 
   // Get next sort_order
   const { data: existing } = await admin
@@ -63,6 +65,7 @@ export async function POST(request: NextRequest) {
     .insert({
       client_id,
       name: name.trim(),
+      category: resolvedCategory,
       created_by: 'admin',
       is_active: true,
       sort_order: nextOrder,

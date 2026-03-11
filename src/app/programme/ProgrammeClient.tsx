@@ -14,7 +14,7 @@ const C = {
   muted:   '#484848',
   dimmed:  '#1E1E1E',
   text:    '#F2F2F5',
-  accent:  '#8B1A1A',
+  accent:  '#3A86FF',
   gold:    '#C9A84C',
 }
 const D = { fontFamily: '"Barlow Condensed", sans-serif' } as const
@@ -66,12 +66,12 @@ const PHASES = [
 
 // ─── Level system ─────────────────────────────────────────────────────────────
 const LEVELS = [
-  { name: 'Initié',          min: 0,     max: 500   },
-  { name: 'Soldat',          min: 500,   max: 1500  },
-  { name: 'Guerrier',        min: 1500,  max: 3000  },
-  { name: 'Combattant',      min: 3000,  max: 6000  },
-  { name: "Homme d'honneur", min: 6000,  max: 12000 },
-  { name: 'Gentleman Létal', min: 12000, max: Infinity },
+  { name: 'Recrue',    min: 0,     max: 500   },
+  { name: 'Aspirant',  min: 500,   max: 1500  },
+  { name: 'Disciple',  min: 1500,  max: 3000  },
+  { name: 'Initié',    min: 3000,  max: 6000  },
+  { name: 'Élite',     min: 6000,  max: 12000 },
+  { name: 'ÉLITE MAX', min: 12000, max: Infinity },
 ]
 function getCurrentLevel(xp: number) {
   return LEVELS.find(l => xp >= l.min && xp < l.max) ?? LEVELS[LEVELS.length - 1]
@@ -295,7 +295,7 @@ export default function ProgrammeClient({
             {/* Left */}
             <div>
               <div style={{ ...D, fontWeight: 700, fontSize: '10px', letterSpacing: '0.4em', color: C.muted, textTransform: 'uppercase' as const, marginBottom: 12 }}>
-                Programme 180 Jours · Gentleman Létal Club
+                Programme 180 Jours · Projet180
               </div>
               <h1 style={{
                 ...D, fontWeight: 900,

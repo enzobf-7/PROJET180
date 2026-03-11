@@ -25,7 +25,7 @@ export default async function DashboardPage() {
     admin.from('onboarding_progress').select('completed_at').eq('user_id', user.id).single(),
     admin.from('questionnaire_responses').select('responses').eq('client_id', user.id).single(),
     admin.from('gamification').select('xp_total, current_streak, longest_streak, level').eq('client_id', user.id).single(),
-    admin.from('habits').select('id, name').eq('client_id', user.id).eq('is_active', true).order('sort_order, name'),
+    admin.from('habits').select('id, name, category').eq('client_id', user.id).eq('is_active', true).order('sort_order, name'),
     admin.from('habit_logs').select('habit_id, completed').eq('client_id', user.id).eq('date', today),
     admin.from('gamification').select('client_id, xp_total, current_streak').order('xp_total', { ascending: false }).limit(100),
     admin.from('app_settings').select('whatsapp_link').eq('id', 1).single(),
@@ -93,7 +93,7 @@ export default async function DashboardPage() {
         (gamification as { xp_total: number; current_streak: number; longest_streak: number; level: number })
         ?? { xp_total: 0, current_streak: 0, longest_streak: 0, level: 1 }
       }
-      habits={(habits ?? []) as Array<{ id: string; name: string }>}
+      habits={(habits ?? []) as Array<{ id: string; name: string; category: string }>}
       completedHabitIds={completedHabitIds}
       responses={responses}
       leaderboard={leaderboard}

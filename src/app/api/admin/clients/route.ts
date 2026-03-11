@@ -121,14 +121,14 @@ async function sendWelcomeEmail(email: string, firstName: string, password: stri
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        sender: { name: 'Robin — Gentleman Létal Club', email: 'noreply@gentlemanletal.club' },
+        sender: { name: 'Robin — Projet180', email: 'noreply@gentlemanletal.club' },
         to: [{ email, name: firstName }],
-        subject: 'Bienvenue dans le Gentleman Létal Club',
+        subject: 'Bienvenue dans Projet180',
         htmlContent: `
           <div style="font-family: -apple-system, sans-serif; max-width: 500px; margin: 0 auto; color: #F5F5F5; background: #060606; padding: 40px 30px; border-radius: 16px;">
             <h1 style="font-size: 24px; margin-bottom: 20px;">Bienvenue ${firstName}.</h1>
             <p style="color: #888; line-height: 1.7;">
-              Tu viens de rejoindre le Gentleman Létal Club. La transformation commence maintenant.
+              Tu viens de rejoindre Projet180. La transformation commence maintenant.
             </p>
             <p style="color: #888; line-height: 1.7;">
               Connecte-toi et complète tes étapes de pré-onboarding.
@@ -140,11 +140,11 @@ async function sendWelcomeEmail(email: string, firstName: string, password: stri
               <p style="margin: 4px 0; color: #F5F5F5;"><strong>Mot de passe :</strong> ${password}</p>
               <p style="margin: 8px 0 0; color: #888; font-size: 12px;">Change ton mot de passe après ta première connexion.</p>
             </div>
-            <a href="${appUrl}" style="display: inline-block; background: #8B1A1A; color: white; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 600; margin-top: 8px;">
+            <a href="${appUrl}" style="display: inline-block; background: #3A86FF; color: white; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 600; margin-top: 8px;">
               Accéder à ma plateforme
             </a>
             <p style="color: #555; font-size: 13px; margin-top: 32px;">
-              — Robin, Gentleman Létal Club
+              — Robin, Projet180
             </p>
           </div>
         `,

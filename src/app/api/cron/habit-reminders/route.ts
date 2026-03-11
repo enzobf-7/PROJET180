@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
           'content-type': 'application/json',
         },
         body: JSON.stringify({
-          sender: { name: 'Robin — Gentleman Létal Club', email: 'noreply@gentlemanletal.club' },
+          sender: { name: 'Robin — Projet180', email: 'noreply@gentlemanletal.club' },
           to: [{ email: profile.email, name: firstName }],
           subject: 'Tu as manqué tes habitudes hier',
           htmlContent: `
@@ -80,11 +80,11 @@ export async function GET(request: NextRequest) {
               <p style="color: #888; line-height: 1.7;">
                 Le succès se construit dans la régularité. Pas dans la perfection — dans la constance.
               </p>
-              <a href="${appUrl}/dashboard" style="display: inline-block; background: #8B1A1A; color: white; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 600; margin-top: 16px;">
+              <a href="${appUrl}/dashboard" style="display: inline-block; background: #3A86FF; color: white; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 600; margin-top: 16px;">
                 Reprendre aujourd'hui
               </a>
               <p style="color: #484848; font-size: 13px; margin-top: 32px;">
-                — Robin, Gentleman Létal Club
+                — Robin, Projet180
               </p>
             </div>
           `,

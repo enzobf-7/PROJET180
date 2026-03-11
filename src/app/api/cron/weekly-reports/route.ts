@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
       try {
         const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
         const firstName = profileData?.first_name || 'toi'
-        const prompt = `Tu es Robin Duplouis, coach du programme Gentleman Létal Club (180 jours de transformation masculine). Tu dois écrire un bref message de bilan hebdomadaire personnalisé pour ton client.
+        const prompt = `Tu es Robin Duplouis, coach du programme Projet180 (180 jours de transformation masculine). Tu dois écrire un bref message de bilan hebdomadaire personnalisé pour ton client.
 
 Client : ${firstName}
 Semaine ${weekNumber} sur 26

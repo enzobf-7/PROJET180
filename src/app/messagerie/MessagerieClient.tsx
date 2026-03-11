@@ -14,8 +14,8 @@ const C = {
   muted:   '#484848',
   dimmed:  '#161616',
   text:    '#F0F0F0',
-  accent:  '#8B1A1A',
-  accentL: '#A32020',
+  accent:  '#3A86FF',
+  accentL: '#2B75EE',
   gold:    '#C9A84C',
 }
 const D = { fontFamily: '"Barlow Condensed", sans-serif' } as const
@@ -40,12 +40,12 @@ interface Props {
 
 // ─── Level system ─────────────────────────────────────────────────────────────
 const LEVELS = [
-  { name: 'Initié',          min: 0,     max: 500   },
-  { name: 'Soldat',          min: 500,   max: 1500  },
-  { name: 'Guerrier',        min: 1500,  max: 3000  },
-  { name: 'Combattant',      min: 3000,  max: 6000  },
-  { name: "Homme d'honneur", min: 6000,  max: 12000 },
-  { name: 'Gentleman Létal', min: 12000, max: Infinity },
+  { name: 'Recrue',    min: 0,     max: 500   },
+  { name: 'Aspirant',  min: 500,   max: 1500  },
+  { name: 'Disciple',  min: 1500,  max: 3000  },
+  { name: 'Initié',    min: 3000,  max: 6000  },
+  { name: 'Élite',     min: 6000,  max: 12000 },
+  { name: 'ÉLITE MAX', min: 12000, max: Infinity },
 ]
 
 function getCurrentLevel(xp: number) {
@@ -213,14 +213,14 @@ export default function MessagerieClient({
               width: 36, height: 36, background: C.accent,
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
             }}>
-              <span style={{ ...D, fontWeight: 900, fontSize: '14px', color: 'white', letterSpacing: '0.05em' }}>GLC</span>
+              <span style={{ ...D, fontWeight: 900, fontSize: '14px', color: 'white', letterSpacing: '0.05em' }}>P180</span>
             </div>
             <div>
               <div style={{ ...D, fontWeight: 900, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: C.text, lineHeight: 1.1 }}>
-                Gentleman
+                Projet
               </div>
               <div style={{ ...D, fontWeight: 900, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: C.accent, lineHeight: 1.1 }}>
-                Létal Club
+                180
               </div>
             </div>
           </div>
@@ -320,7 +320,7 @@ export default function MessagerieClient({
                 Robin Duplouis
               </div>
               <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: C.accent, marginTop: 2 }}>
-                Votre coach — GLC
+                Votre coach — Projet180
               </div>
             </div>
           </div>

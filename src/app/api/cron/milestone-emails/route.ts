@@ -98,21 +98,21 @@ export async function GET(request: NextRequest) {
           'content-type': 'application/json',
         },
         body: JSON.stringify({
-          sender: { name: 'Robin — Gentleman Létal Club', email: 'noreply@gentlemanletal.club' },
+          sender: { name: 'Robin — Projet180', email: 'noreply@gentlemanletal.club' },
           to: [{ email: profile.email, name: firstName }],
           subject: msg.subject,
           htmlContent: `
             <div style="font-family: -apple-system, sans-serif; max-width: 500px; margin: 0 auto; color: #F2F2F5; background: #060606; padding: 40px 30px; border-radius: 16px;">
-              <p style="color: #8B1A1A; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">Jour ${milestone} / 180</p>
+              <p style="color: #3A86FF; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">Jour ${milestone} / 180</p>
               <h1 style="font-size: 22px; margin-bottom: 24px;">${firstName}.</h1>
               <p style="color: #888; line-height: 1.8;">
                 ${msg.body}
               </p>
-              <a href="${appUrl}/dashboard" style="display: inline-block; background: #8B1A1A; color: white; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 600; margin-top: 24px;">
+              <a href="${appUrl}/dashboard" style="display: inline-block; background: #3A86FF; color: white; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 600; margin-top: 24px;">
                 Voir ma progression
               </a>
               <p style="color: #484848; font-size: 13px; margin-top: 32px;">
-                — Robin, Gentleman Létal Club
+                — Robin, Projet180
               </p>
             </div>
           `,

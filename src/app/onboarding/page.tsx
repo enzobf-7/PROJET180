@@ -254,9 +254,9 @@ export default function OnboardingPage() {
                     (s === 3 && progress.step3_whatsapp) ||
                     (s === 4 && progress.step4_skool) ||
                     (s === 5 && progress.step5_call)
-                      ? '#8B1A1A'
+                      ? '#3A86FF'
                       : s === currentStep
-                      ? '#A32020'
+                      ? '#2B75EE'
                       : '#1E1E1E'
                 }}
               />
@@ -314,7 +314,7 @@ export default function OnboardingPage() {
         {currentStep === 3 && (
           <Step3Link
             title="Rejoins le groupe WhatsApp"
-            description="Le groupe privé des membres GLC."
+            description="Le groupe privé des membres Projet180."
             details="Espace d'échanges quotidiens, accountability entre membres et annonces importantes de Robin."
             icon="💬"
             cta="Rejoindre le groupe"
@@ -384,7 +384,7 @@ function StepNav({
             className={`
               flex-1 flex items-center justify-center gap-2 px-2 py-5 rounded-lg border font-medium transition-all
               ${isActive
-                ? 'border-[#8B1A1A] bg-[#8B1A1A]/10 text-[#F5F5F5]'
+                ? 'border-[#3A86FF] bg-[#3A86FF]/10 text-[#F5F5F5]'
                 : s.done
                 ? 'border-[#22C55E]/30 bg-[#22C55E]/5 text-[#22C55E] cursor-pointer'
                 : isLocked
@@ -399,7 +399,7 @@ function StepNav({
             ) : s.done ? (
               <span className="text-[#22C55E]">✓</span>
             ) : (
-              <span className={isActive ? 'text-[#8B1A1A]' : 'text-[#484848]'}>{s.n}</span>
+              <span className={isActive ? 'text-[#3A86FF]' : 'text-[#484848]'}>{s.n}</span>
             )}
             <span>{s.label}</span>
           </button>
@@ -441,7 +441,7 @@ function Step1Contract({
             src={pdfUrl}
             className="w-full"
             style={{ height: '60vh', minHeight: 320 }}
-            title="Contrat GLC"
+            title="Contrat Projet180"
           />
         ) : (
           <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
@@ -462,13 +462,13 @@ function Step1Contract({
             className="sr-only"
           />
           <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-            accepted ? 'bg-[#8B1A1A] border-[#8B1A1A]' : 'bg-transparent border-[#1E1E1E] group-hover:border-[#484848]'
+            accepted ? 'bg-[#3A86FF] border-[#3A86FF]' : 'bg-transparent border-[#1E1E1E] group-hover:border-[#484848]'
           }`}>
             {accepted && <span className="text-white text-xs">✓</span>}
           </div>
         </div>
         <span className="text-sm text-[#F0F0F0] leading-relaxed">
-          J'ai lu et j'accepte les conditions générales du programme Gentleman Létal Club.
+          J'ai lu et j'accepte les conditions générales du programme Projet180.
         </span>
       </label>
 
@@ -482,7 +482,7 @@ function Step1Contract({
           value={signatureName}
           onChange={e => onSignatureNameChange(e.target.value)}
           placeholder="Prénom Nom"
-          className="w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-xl px-4 py-3 text-base text-[#F5F5F5] placeholder-[#444444] focus:outline-none focus:border-[#8B1A1A] focus:shadow-[0_0_0_3px_rgba(139,26,26,0.12)] transition-all"
+          className="w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-xl px-4 py-3 text-base text-[#F5F5F5] placeholder-[#444444] focus:outline-none focus:border-[#3A86FF] focus:shadow-[0_0_0_3px_rgba(58,134,255,0.12)] transition-all"
         />
       </div>
 
@@ -535,7 +535,7 @@ function Step2Questionnaire({
           <div
             key={i}
             className="h-0.5 flex-1 rounded-full transition-all"
-            style={{ backgroundColor: i < section ? '#8B1A1A' : i === section - 1 ? '#A32020' : '#1E1E1E' }}
+            style={{ backgroundColor: i < section ? '#3A86FF' : i === section - 1 ? '#2B75EE' : '#1E1E1E' }}
           />
         ))}
       </div>
@@ -702,7 +702,7 @@ function QSection7({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: stri
         <p className="text-sm text-[#888888] leading-relaxed">
           Merci d'avoir pris le temps de remplir ce questionnaire. Ce que tu viens d'écrire, c'est déjà un acte de lucidité sur toi-même. La transformation commence ici.
         </p>
-        <p className="text-sm text-[#8B1A1A] font-medium">— Robin</p>
+        <p className="text-sm text-[#3A86FF] font-medium">— Robin</p>
       </div>
     </div>
   )
@@ -763,7 +763,7 @@ function Step5Call({
 }) {
   if (done) return (
     <div className="space-y-6 text-center py-4">
-      <div className="w-14 h-px bg-[#8B1A1A] mx-auto" />
+      <div className="w-14 h-px bg-[#3A86FF] mx-auto" />
       <h2
         className="text-4xl sm:text-5xl font-black uppercase text-[#F0F0F0]"
         style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800 }}
@@ -789,13 +789,13 @@ function Step5Call({
           <div className="space-y-2 text-left mt-4">
             {['Contrat signé', 'Questionnaire rempli', 'WhatsApp rejoint', 'Skool rejoint'].map((l, i) => (
               <p key={i} className="text-xs text-[#484848] flex items-center gap-2">
-                <span className="text-[#8B1A1A]">→</span> {l}
+                <span className="text-[#3A86FF]">→</span> {l}
               </p>
             ))}
           </div>
         </div>
       ) : (
-        <div className="rounded-xl border border-[#8B1A1A]/30 bg-[#8B1A1A]/5 p-6 text-center space-y-4">
+        <div className="rounded-xl border border-[#3A86FF]/30 bg-[#3A86FF]/5 p-6 text-center space-y-4">
           <div className="text-6xl">📞</div>
           <p className="text-[#F5F5F5] text-sm font-medium">Tu y es. Robin t'attend.</p>
           <p className="text-[#484848] text-sm leading-relaxed">
@@ -816,7 +816,7 @@ function StepHeader({ number, title, subtitle }: { number: string; title: string
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
-        <span className="text-[#8B1A1A] text-xs font-black tracking-widest uppercase"
+        <span className="text-[#3A86FF] text-xs font-black tracking-widest uppercase"
           style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '0.1em' }}
         >{number}</span>
         <div className="h-px flex-1 bg-[#1E1E1E]" />
@@ -872,7 +872,7 @@ function QInput({
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-xl px-4 py-3 text-base text-[#F5F5F5] placeholder-[#444444] focus:outline-none focus:border-[#8B1A1A] focus:shadow-[0_0_0_3px_rgba(139,26,26,0.12)] transition-all"
+        className="w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-xl px-4 py-3 text-base text-[#F5F5F5] placeholder-[#444444] focus:outline-none focus:border-[#3A86FF] focus:shadow-[0_0_0_3px_rgba(58,134,255,0.12)] transition-all"
       />
     </div>
   )
@@ -892,7 +892,7 @@ function QTextarea({
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-xl px-4 py-3 text-base text-[#F5F5F5] placeholder-[#444444] focus:outline-none focus:border-[#8B1A1A] focus:shadow-[0_0_0_3px_rgba(139,26,26,0.12)] transition-all resize-none"
+        className="w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-xl px-4 py-3 text-base text-[#F5F5F5] placeholder-[#444444] focus:outline-none focus:border-[#3A86FF] focus:shadow-[0_0_0_3px_rgba(58,134,255,0.12)] transition-all resize-none"
       />
     </div>
   )
@@ -909,7 +909,7 @@ function QSelect({
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-xl px-4 py-3 text-base text-[#F5F5F5] focus:outline-none focus:border-[#8B1A1A] focus:shadow-[0_0_0_3px_rgba(139,26,26,0.12)] transition-all appearance-none"
+        className="w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-xl px-4 py-3 text-base text-[#F5F5F5] focus:outline-none focus:border-[#3A86FF] focus:shadow-[0_0_0_3px_rgba(58,134,255,0.12)] transition-all appearance-none"
       >
         <option value="">Choisir…</option>
         {options.map(o => <option key={o} value={o}>{o}</option>)}
@@ -927,7 +927,7 @@ function QSlider({
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium text-[#888888] uppercase tracking-wider">{label}</label>
-        <span className="text-lg font-black text-[#8B1A1A]">{value}/10</span>
+        <span className="text-lg font-black text-[#3A86FF]">{value}/10</span>
       </div>
       <input
         type="range"
@@ -935,7 +935,7 @@ function QSlider({
         max={10}
         value={value}
         onChange={e => onChange(Number(e.target.value))}
-        className="w-full accent-[#8B1A1A]"
+        className="w-full accent-[#3A86FF]"
       />
       <div className="flex justify-between text-xs text-[#484848]">
         <span>1 — Très mauvais</span>
@@ -982,7 +982,7 @@ function RedirectScreen({ onDone }: { onDone: () => void }) {
         <div
           style={{
             height: '100%',
-            background: '#8B1A1A',
+            background: '#3A86FF',
             animation: 'fillBar 1.8s linear forwards',
           }}
         />
