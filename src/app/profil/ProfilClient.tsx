@@ -464,12 +464,22 @@ export default function ProfilClient({ jourX, email, responses, gamification, on
             </div>
           )}
 
-          {/* ── Questionnaire ─────────────────────────────────────────────── */}
-          <div style={{ background: C.surface, border: `1px solid ${C.border}` }}>
+          {/* ── Questionnaire (accordéon) ─────────────────────────────────── */}
+          <details style={{ background: C.surface, border: `1px solid ${C.border}` }}>
+            <summary style={{
+              ...D, fontWeight: 700, fontSize: '13px', letterSpacing: '0.12em',
+              textTransform: 'uppercase' as const, color: C.muted,
+              padding: '16px 28px', cursor: 'pointer', userSelect: 'none' as const,
+              listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            }}>
+              Questionnaire d&apos;entrée
+              <span style={{ fontSize: '11px', letterSpacing: '0.1em' }}>▼</span>
+            </summary>
+
             {/* Section tabs */}
             <div style={{
               display: 'flex', overflowX: 'auto' as const,
-              borderBottom: `1px solid ${C.border}`,
+              borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`,
             }}>
               {SECTIONS.map((s, i) => (
                 <button
@@ -521,7 +531,7 @@ export default function ProfilClient({ jourX, email, responses, gamification, on
                 </div>
               )}
             </div>
-          </div>
+          </details>
 
         {/* ── Weekly Reports ────────────────────────────────────────────────── */}
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, marginTop: 24 }}>
