@@ -22,12 +22,24 @@ export async function POST() {
     return NextResponse.json({ error: 'Test user not found' }, { status: 404 })
   }
 
-  const { error } = await supabase
+  // Try update first (row may already exist from Stripe webhook / admin creation)
+  const { data: existing } = await supabase
     .from('onboarding_progress')
-    .upsert({
-      client_id: user.id,
-      completed_at: new Date().toISOString(),
-    }, { onConflict: 'client_id' })
+    .select('client_id')
+    .eq('client_id', user.id)
+    .single()
+
+  let error
+  if (existing) {
+    ;({ error } = await supabase
+      .from('onboarding_progress')
+      .update({ completed_at: new Date().toISOString() })
+      .eq('client_id', user.id))
+  } else {
+    ;({ error } = await supabase
+      .from('onboarding_progress')
+      .insert({ client_id: user.id, completed_at: new Date().toISOString() }))
+  }
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
