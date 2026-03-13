@@ -11,8 +11,7 @@ Plateforme de coaching 180j "Projet180" par Robin Duplouis.
 
 ## Dev
 ```bash
-cd glc-app
-npm run dev   # port 3000
+npm run dev   # port 3000 (depuis la racine glc-app/)
 ```
 
 ## Structure des routes
