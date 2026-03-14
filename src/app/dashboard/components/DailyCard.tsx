@@ -2,7 +2,7 @@
 
 import { memo } from 'react'
 import { C, D, M } from '@/lib/design-tokens'
-import type { Habit } from '@/lib/types'
+import type { Habit, Todo } from '@/lib/types'
 
 interface Props {
   habits: Habit[]
@@ -12,17 +12,25 @@ interface Props {
   isMobile: boolean
   celebrateRing: boolean
   onToggle: (habitId: string) => void
+  todos: Todo[]
+  todayDate: string
+  onToggleTodo: (todoId: string, currentDate: string | null) => void
 }
 
-export const CheckInCard = memo(function CheckInCard({ habits, completed, loadingId, firstName, isMobile, celebrateRing, onToggle }: Props) {
+export const DailyCard = memo(function DailyCard({
+  habits, completed, loadingId, firstName, isMobile, celebrateRing, onToggle,
+  todos, todayDate, onToggleTodo,
+}: Props) {
   const habitsOnly = habits.filter(h => h.category === 'habit')
   const missions = habits.filter(h => h.category === 'mission')
   const totalHabits = habits.length
-  const completedCount = completed.size
-  const completedPct = totalHabits > 0 ? Math.round((completedCount / totalHabits) * 100) : 0
-  const allDone = totalHabits > 0 && completedCount === totalHabits
+  const completedHabits = completed.size
+  const completedPct = totalHabits > 0 ? Math.round((completedHabits / totalHabits) * 100) : 0
+  const allHabitsDone = totalHabits > 0 && completedHabits === totalHabits
+  const allTodosDone = todos.length > 0 && todos.every(t => t.completed_date === todayDate)
+  const allDone = allHabitsDone && allTodosDone
 
-  const renderRow = (h: Habit, accentColor: string) => {
+  const renderHabitRow = (h: Habit, accentColor: string) => {
     const done = completed.has(h.id)
     const loading = loadingId === h.id
     return (
@@ -58,6 +66,41 @@ export const CheckInCard = memo(function CheckInCard({ habits, completed, loadin
     )
   }
 
+  const renderTodoRow = (todo: Todo) => {
+    const isDone = todo.completed_date === todayDate
+    return (
+      <button key={todo.id} onClick={() => onToggleTodo(todo.id, todo.completed_date)} style={{
+        display: 'flex', alignItems: 'center', gap: 14,
+        width: '100%', background: 'none', border: 'none', cursor: 'pointer',
+        padding: '11px 24px',
+        borderBottom: `1px solid ${C.border}`,
+        transition: 'opacity 0.15s',
+      }}>
+        <div style={{
+          width: 22, height: 22, flexShrink: 0,
+          borderRadius: 6,
+          border: `2px solid ${isDone ? C.greenL : C.muted}`,
+          background: isDone ? C.greenL : 'transparent',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'all 0.2s',
+        }}>
+          {isDone && <span style={{ color: 'white', fontSize: '13px', lineHeight: 1 }}>✓</span>}
+        </div>
+        <span style={{
+          ...D, fontWeight: 600, fontSize: '14px', letterSpacing: '0.02em',
+          color: isDone ? C.muted : C.text,
+          textDecoration: isDone ? 'line-through' : 'none',
+          textAlign: 'left',
+        }}>
+          {todo.title}
+          {todo.is_system && (
+            <span style={{ ...M, fontSize: '9px', color: C.accent, marginLeft: 8, letterSpacing: '0.1em' }}>SYS</span>
+          )}
+        </span>
+      </button>
+    )
+  }
+
   return (
     <div className="p180-fade p180-card" style={{
       background: C.surface,
@@ -75,7 +118,7 @@ export const CheckInCard = memo(function CheckInCard({ habits, completed, loadin
           <div className={celebrateRing ? 'p180-ring-done' : ''} style={{ position: 'relative', width: 48, height: 48, flexShrink: 0 }}>
             <svg width={48} height={48} style={{ transform: 'rotate(-90deg)' }}>
               <circle cx={24} cy={24} r={20} fill="none" stroke={C.dimmed} strokeWidth={3} />
-              <circle cx={24} cy={24} r={20} fill="none" stroke={allDone ? C.greenL : C.accent} strokeWidth={3}
+              <circle cx={24} cy={24} r={20} fill="none" stroke={allHabitsDone ? C.greenL : C.accent} strokeWidth={3}
                 strokeDasharray={`${2 * Math.PI * 20}`}
                 strokeDashoffset={`${2 * Math.PI * 20 * (1 - completedPct / 100)}`}
                 strokeLinecap="round"
@@ -85,9 +128,9 @@ export const CheckInCard = memo(function CheckInCard({ habits, completed, loadin
             <div style={{
               position: 'absolute', inset: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              ...M, fontWeight: 700, fontSize: '13px', color: allDone ? C.greenL : C.text,
+              ...M, fontWeight: 700, fontSize: '13px', color: allHabitsDone ? C.greenL : C.text,
             }}>
-              {allDone ? '✓' : `${completedPct}%`}
+              {allHabitsDone ? '✓' : `${completedPct}%`}
             </div>
           </div>
           <div>
@@ -95,7 +138,7 @@ export const CheckInCard = memo(function CheckInCard({ habits, completed, loadin
               Check-in du jour
             </div>
             <div style={{ ...M, fontSize: '10px', color: C.muted, marginTop: 2 }}>
-              {completedCount}/{totalHabits} — {allDone ? 'Tout validé !' : `${totalHabits - completedCount} restant${totalHabits - completedCount > 1 ? 's' : ''}`}
+              {completedHabits}/{totalHabits} habits — {allHabitsDone ? 'Tout validé !' : `${totalHabits - completedHabits} restant${totalHabits - completedHabits > 1 ? 's' : ''}`}
             </div>
           </div>
         </div>
@@ -107,7 +150,7 @@ export const CheckInCard = memo(function CheckInCard({ habits, completed, loadin
           <div style={{ padding: '12px 24px 6px', ...D, fontWeight: 700, fontSize: '10px', letterSpacing: '0.2em', color: C.muted, textTransform: 'uppercase' as const }}>
             Habitudes
           </div>
-          {habitsOnly.map(h => renderRow(h, C.greenL))}
+          {habitsOnly.map(h => renderHabitRow(h, C.greenL))}
         </div>
       )}
 
@@ -117,12 +160,22 @@ export const CheckInCard = memo(function CheckInCard({ habits, completed, loadin
           <div style={{ padding: '14px 24px 6px', ...D, fontWeight: 700, fontSize: '10px', letterSpacing: '0.2em', color: C.accent, textTransform: 'uppercase' as const }}>
             Missions
           </div>
-          {missions.map(h => renderRow(h, C.accent))}
+          {missions.map(h => renderHabitRow(h, C.accent))}
         </div>
       )}
 
-      {/* All done */}
-      {allDone && totalHabits > 0 && (
+      {/* Todos */}
+      {todos.length > 0 && (
+        <div>
+          <div style={{ padding: '14px 24px 6px', ...D, fontWeight: 700, fontSize: '10px', letterSpacing: '0.2em', color: C.muted, textTransform: 'uppercase' as const }}>
+            To-do
+          </div>
+          {todos.map(renderTodoRow)}
+        </div>
+      )}
+
+      {/* All done message */}
+      {allDone && (
         <div style={{ padding: '16px 24px', textAlign: 'center', background: `${C.green}10` }}>
           <span style={{ ...D, fontWeight: 700, fontSize: '13px', color: C.greenL, letterSpacing: '0.08em' }}>
             ✓ Journée complète — bien joué {firstName} !

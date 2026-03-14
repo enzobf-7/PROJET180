@@ -7,21 +7,18 @@ import { toggleHabitAction } from './actions'
 import { getXpDelta } from './utils'
 import { C } from '@/lib/design-tokens'
 import type { DashboardProps, XPParticle, Win } from '@/lib/types'
-import { useCountdown, useIsMobile } from '@/lib/hooks'
+import { useIsMobile } from '@/lib/hooks'
 import { getCurrentLevel, getLevelProgress, getNextLevel, getLevelByXp } from '@/lib/levels'
 import {
   DashboardAnimations,
   XPParticles,
   LevelUpOverlay,
-  Sidebar,
-  StickyHeader,
+  TopBar,
   HeroCard,
-  CheckInCard,
+  DailyCard,
   ProgressionPanel,
-  TodoCard,
   WinsCard,
   LeaderboardCard,
-  MobileBottomNav,
 } from './components'
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -42,13 +39,13 @@ export default function DashboardClient({
   const [celebrateRing, setCelebrateRing] = useState(false)
   const [displayedLevelPct, setDisplayedLevelPct] = useState(0)
   const isMobile = useIsMobile()
-  const countdown = useCountdown(onboardingDate)
-  const supabase  = createClient()
+  const supabase = createClient()
 
-  // ── Wins (server-side initial data, client-side for optimistic adds) ──────
+  // ── Wins (only shown on Sundays) ────────────────────────────────────────────
   const [wins, setWins] = useState<Win[]>(initialWins)
   const [winInput, setWinInput] = useState('')
   const [winSubmitting, setWinSubmitting] = useState(false)
+  const isSunday = new Date().getDay() === 0
 
   const handleAddWin = async () => {
     const text = winInput.trim()
@@ -68,7 +65,7 @@ export default function DashboardClient({
     setWinSubmitting(false)
   }
 
-  // ── To-do du jour (server-side initial data, client-side for optimistic toggles)
+  // ── To-do du jour ───────────────────────────────────────────────────────────
   const todayDate = new Date().toISOString().slice(0, 10)
   const [todos, setTodos] = useState(initialTodos)
 
@@ -145,16 +142,16 @@ export default function DashboardClient({
   const visionText  = (responses?.vision as string) ?? null
   const objectifText = (responses?.objectif_principal as string) ?? null
 
-  // ── Badges ────────────────────────────────────────────────────────────────
-  const BADGES: { key: string; label: string; icon: string; earned: boolean; desc: string }[] = [
-    { key: 'first_step',   label: 'Premier pas',      icon: '⚡', earned: xp >= 10,      desc: 'Premier XP gagné' },
-    { key: 'week_fire',    label: 'Semaine de feu',    icon: '🔥', earned: streak >= 7,    desc: '7 jours de série' },
-    { key: 'fortnight',    label: 'Quinzaine',         icon: '⚔',  earned: streak >= 14,   desc: '14 jours de série' },
-    { key: 'month_king',   label: 'Mois entier',       icon: '👑', earned: record >= 30,   desc: '30 jours de série' },
-    { key: 'soldier',      label: 'Soldat',            icon: '🛡',  earned: xp >= 500,      desc: '500 XP cumulés' },
-    { key: 'warrior',      label: 'Guerrier',          icon: '⚔',  earned: xp >= 1500,     desc: '1 500 XP cumulés' },
-    { key: 'fighter',      label: 'Combattant',        icon: '💎', earned: xp >= 3000,     desc: '3 000 XP cumulés' },
-    { key: 'honor',        label: "Homme d'honneur",   icon: '🏆', earned: xp >= 6000,     desc: '6 000 XP cumulés' },
+  // ── Badges (with progress tracking) ─────────────────────────────────────
+  const BADGES: { key: string; label: string; icon: string; earned: boolean; desc: string; target: number; current: number; unit: string }[] = [
+    { key: 'first_step',   label: 'Premier pas',      icon: '⚡', earned: xp >= 10,      desc: 'Premier XP gagné',      target: 10,    current: Math.min(xp, 10),     unit: 'XP' },
+    { key: 'week_fire',    label: 'Semaine de feu',    icon: '🔥', earned: streak >= 7,    desc: '7 jours de série',      target: 7,     current: Math.min(streak, 7),   unit: 'j' },
+    { key: 'fortnight',    label: 'Quinzaine',         icon: '⚔',  earned: streak >= 14,   desc: '14 jours de série',     target: 14,    current: Math.min(streak, 14),  unit: 'j' },
+    { key: 'month_king',   label: 'Mois entier',       icon: '👑', earned: record >= 30,   desc: '30 jours de série',     target: 30,    current: Math.min(record, 30),  unit: 'j' },
+    { key: 'soldier',      label: 'Soldat',            icon: '🛡',  earned: xp >= 500,      desc: '500 XP cumulés',        target: 500,   current: Math.min(xp, 500),     unit: 'XP' },
+    { key: 'warrior',      label: 'Guerrier',          icon: '⚔',  earned: xp >= 1500,     desc: '1 500 XP cumulés',      target: 1500,  current: Math.min(xp, 1500),    unit: 'XP' },
+    { key: 'fighter',      label: 'Combattant',        icon: '💎', earned: xp >= 3000,     desc: '3 000 XP cumulés',      target: 3000,  current: Math.min(xp, 3000),    unit: 'XP' },
+    { key: 'honor',        label: "Homme d'honneur",   icon: '🏆', earned: xp >= 6000,     desc: '6 000 XP cumulés',      target: 6000,  current: Math.min(xp, 6000),    unit: 'XP' },
   ]
   const earnedCount = BADGES.filter(b => b.earned).length
 
@@ -192,42 +189,28 @@ export default function DashboardClient({
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: C.bg, color: C.text, overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: C.bg, color: C.text, overflowX: 'hidden' }}>
       <DashboardAnimations />
       <XPParticles particles={particles} isMobile={isMobile} />
       {levelUpOverlay && <LevelUpOverlay levelName={levelUpOverlay} />}
 
-      {!isMobile && (
-        <Sidebar
-          firstName={firstName}
-          level={level}
-          navItems={navItems}
-          whatsappLink={whatsappLink}
-          jourX={jourX}
-          daysPct={daysPct}
-          onSignOut={handleSignOut}
-        />
-      )}
+      <TopBar
+        jourX={jourX}
+        daysLeft={daysLeft}
+        daysPct={daysPct}
+        firstName={firstName}
+        navItems={navItems}
+        onSignOut={handleSignOut}
+      />
 
       <main style={{
         flex: 1,
-        marginLeft: isMobile ? 0 : 220,
         display: 'flex',
         flexDirection: 'column' as const,
-        minHeight: '100vh',
       }}>
-        <StickyHeader
-          jourX={jourX}
-          daysLeft={daysLeft}
-          daysPct={daysPct}
-          isMobile={isMobile}
-          countdown={countdown}
-          onboardingDate={onboardingDate}
-        />
-
         <div style={{
           flex: 1,
-          padding: isMobile ? '20px 16px 100px' : '28px 32px 48px',
+          padding: isMobile ? '20px 16px 40px' : '28px 32px 48px',
           maxWidth: 1120,
           width: '100%',
           margin: '0 auto',
@@ -246,9 +229,9 @@ export default function DashboardClient({
             isMobile={isMobile}
           />
 
-          {/* Two-column: Check-in + Progression */}
+          {/* Two-column: DailyCard + Progression */}
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 380px', gap: 20, marginBottom: 20 }}>
-            <CheckInCard
+            <DailyCard
               habits={habits}
               completed={completed}
               loadingId={loadingId}
@@ -256,6 +239,9 @@ export default function DashboardClient({
               isMobile={isMobile}
               celebrateRing={celebrateRing}
               onToggle={handleToggle}
+              todos={todos}
+              todayDate={todayDate}
+              onToggleTodo={handleToggleTodo}
             />
             <ProgressionPanel
               streak={streak}
@@ -269,30 +255,27 @@ export default function DashboardClient({
             />
           </div>
 
-          {/* Three-column: Todo + Wins + Leaderboard */}
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 20 }}>
-            <TodoCard
-              todos={todos}
-              todayDate={todayDate}
-              onToggleTodo={handleToggleTodo}
-            />
-            <WinsCard
-              wins={wins}
-              weekNumber={weekNumber}
-              winInput={winInput}
-              winSubmitting={winSubmitting}
-              onWinInputChange={setWinInput}
-              onAddWin={handleAddWin}
-            />
-            <LeaderboardCard
-              leaderboard={leaderboard}
-              maxXP={maxXP}
-              isMobile={isMobile}
-            />
-          </div>
-        </div>
+          {/* Leaderboard — full width */}
+          <LeaderboardCard
+            leaderboard={leaderboard}
+            maxXP={maxXP}
+            isMobile={isMobile}
+          />
 
-        {isMobile && <MobileBottomNav navItems={navItems} />}
+          {/* Wins — Sunday only */}
+          {isSunday && (
+            <div style={{ marginTop: 20 }}>
+              <WinsCard
+                wins={wins}
+                weekNumber={weekNumber}
+                winInput={winInput}
+                winSubmitting={winSubmitting}
+                onWinInputChange={setWinInput}
+                onAddWin={handleAddWin}
+              />
+            </div>
+          )}
+        </div>
       </main>
     </div>
   )

@@ -2,9 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "GLC App (Next.js)",
+      "name": "Projet180",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["-c", "cd glc-app && npm run dev"],
+      "runtimeArgs": ["-c", "cd /Users/enzobf/Documents/BIZ/CLIENTS/PROJET180/projet180-app && npm run dev"],
       "port": 3000
     }
   ]

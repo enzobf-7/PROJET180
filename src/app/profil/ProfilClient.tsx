@@ -3,23 +3,8 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import P180Logo from '@/components/P180Logo'
-
-// ─── Design tokens ────────────────────────────────────────────────────────────
-const C = {
-  bg:      '#060606',
-  surface: '#0F0F0F',
-  sidebar: '#060606',
-  border:  '#1E1E1E',
-  muted:   '#484848',
-  dimmed:  '#1E1E1E',
-  text:    '#F2F2F5',
-  accent:  '#3A86FF',
-  gold:    '#C9A84C',
-  green:   '#22C55E',
-}
-const D = { fontFamily: '"Barlow Condensed", sans-serif' } as const
-const M = { fontFamily: '"JetBrains Mono", monospace' }    as const
+import { C, D, M } from '@/lib/design-tokens'
+import { TopBar } from '@/app/dashboard/components/TopBar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Gamification {
@@ -156,107 +141,22 @@ export default function ProfilClient({ jourX, email, responses, gamification, on
     return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
   }
 
+  const daysLeft = 180 - jourX
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: C.bg, color: C.text }}>
+    <div style={{ minHeight: '100vh', background: C.bg, color: C.text }}>
 
-      {/* ── Sidebar ──────────────────────────────────────────────────────────── */}
-      <aside style={{
-        width: 220, flexShrink: 0, position: 'fixed', top: 0, left: 0, bottom: 0,
-        background: C.sidebar, borderRight: `1px solid ${C.border}`,
-        display: 'flex', flexDirection: 'column',
-      }}>
-        {/* Logo */}
-        <div style={{ padding: '20px 20px 18px', borderBottom: `1px solid ${C.border}` }}>
-          <P180Logo size="sm" />
-        </div>
-
-        {/* Nav */}
-        <nav style={{ flex: 1, padding: '16px 12px', overflowY: 'auto' as const }}>
-          {navItems.map(item => (
-            <a key={item.href} href={item.href} style={{
-              display: 'block',
-              padding: '9px 12px',
-              marginBottom: 2,
-              ...D,
-              fontWeight: 700,
-              fontSize: '13px',
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase' as const,
-              textDecoration: 'none',
-              color:      item.active ? C.text : C.muted,
-              background: item.active ? C.border : 'transparent',
-              borderLeft: item.active ? `2px solid ${C.accent}` : '2px solid transparent',
-            }}>
-              {item.label}
-            </a>
-          ))}
-        </nav>
-
-        {/* Programme bar */}
-        <div style={{ padding: '0 20px 20px' }}>
-          <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.2em', color: C.muted, textTransform: 'uppercase' as const, marginBottom: 8 }}>
-            Jour {jourX} / 180
-          </div>
-          <div style={{ height: 2, background: C.border }}>
-            <div style={{ height: '100%', width: `${daysPct}%`, background: C.accent }} />
-          </div>
-        </div>
-
-        {/* User footer */}
-        <div style={{
-          borderTop: `1px solid ${C.border}`,
-          padding: '16px 20px',
-          display: 'flex', alignItems: 'center', gap: 10,
-        }}>
-          <div style={{
-            width: 32, height: 32, flexShrink: 0,
-            background: C.accent,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <span style={{ ...D, fontWeight: 900, fontSize: '13px', color: 'white' }}>
-              {firstName.charAt(0).toUpperCase()}
-            </span>
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ ...D, fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: C.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {firstName}
-            </div>
-            <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.15em', color: C.accent, textTransform: 'uppercase' as const }}>
-              {level.name}
-            </div>
-          </div>
-          <button
-            onClick={handleSignOut}
-            disabled={signOutLoading}
-            title="Déconnexion"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: '18px', lineHeight: 1, padding: 4 }}
-          >
-            ⏻
-          </button>
-        </div>
-      </aside>
+      <TopBar
+        jourX={jourX}
+        daysLeft={daysLeft}
+        daysPct={daysPct}
+        firstName={firstName}
+        navItems={navItems}
+        onSignOut={handleSignOut}
+      />
 
       {/* ── Main ─────────────────────────────────────────────────────────────── */}
-      <main style={{ flex: 1, marginLeft: 220, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-
-        {/* Header */}
-        <header style={{
-          position: 'sticky', top: 0, zIndex: 40,
-          background: 'rgba(6,6,6,0.90)', backdropFilter: 'blur(14px)',
-          borderBottom: `1px solid ${C.border}`,
-        }}>
-          <div style={{ height: 2, background: C.dimmed }}>
-            <div style={{ height: '100%', width: `${daysPct}%`, background: C.accent, transition: 'width 1.2s ease' }} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 40px' }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-              <span style={{ ...D, fontWeight: 900, fontSize: '26px', letterSpacing: '0.06em', color: C.text, lineHeight: 1 }}>
-                PROFIL
-              </span>
-              <span style={{ ...M, fontSize: '11px', color: C.muted }}>— Jour {jourX} / 180</span>
-            </div>
-          </div>
-        </header>
+      <main style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 110px)' }}>
 
         {/* Content */}
         <div style={{ padding: '40px', width: '100%' }}>

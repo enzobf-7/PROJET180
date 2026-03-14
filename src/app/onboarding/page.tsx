@@ -226,29 +226,27 @@ export default function OnboardingPage() {
   if (redirecting) return <RedirectScreen onDone={() => router.push('/dashboard')} />
 
   return (
-    <div className="min-h-screen bg-[#060606] text-[#F5F5F5]" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+    <div className="min-h-screen bg-[#060606] text-[#F5F5F5] flex flex-col" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[#060606]/95 backdrop-blur-sm border-b border-[#1E1E1E]">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <P180Logo size="sm" />
-            <span className="text-[#1E1E1E]">|</span>
-            <span className="text-[#F2F2F5] text-base font-black uppercase tracking-widest">Onboarding</span>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-2">
+            <P180Logo size="lg" />
+            <span className="bg-[#3A86FF] text-white text-lg font-bold uppercase tracking-widest px-5 py-2.5 rounded-lg">Onboarding</span>
           </div>
-          <span className="text-[#484848] text-sm">{currentStep}/5</span>
         </div>
       </header>
 
       {/* Progress Bar */}
       <div className="bg-[#0F0F0F] border-b border-[#1E1E1E]">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex gap-2">
             {([1,2,3,4,5] as Step[]).map(s => (
               <div
                 key={s}
                 className="h-2 flex-1 rounded-full transition-all duration-500"
                 style={{
-                  backgroundColor: 
+                  backgroundColor:
                     (s === 1 && progress.step1_contract) ||
                     (s === 2 && progress.step2_questionnaire) ||
                     (s === 3 && progress.step3_whatsapp) ||
@@ -265,8 +263,11 @@ export default function OnboardingPage() {
         </div>
       </div>
 
+      {/* Main content — centered vertically */}
+      <div className="flex-1 flex flex-col justify-center">
+
       {/* Step Nav (read-only status) */}
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-5 sm:py-8 w-full">
         <StepNav
           currentStep={currentStep}
           progress={progress}
@@ -285,7 +286,7 @@ export default function OnboardingPage() {
       </div>
 
       {/* Step Content */}
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 pb-20 sm:pb-24">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-20 sm:pb-24 w-full">
         {currentStep === 1 && (
           <Step1Contract
             pdfUrl={settings.contract_pdf_url}
@@ -346,6 +347,8 @@ export default function OnboardingPage() {
           />
         )}
       </div>
+
+      </div>{/* end flex-1 vertical center */}
     </div>
   )
 }
@@ -382,7 +385,7 @@ function StepNav({
             key={s.n}
             onClick={() => !isLocked && onStepClick(s.n)}
             className={`
-              flex-1 flex items-center justify-center gap-2 px-2 py-5 rounded-lg border font-medium transition-all
+              flex-1 flex items-center justify-center gap-2.5 px-3 py-6 rounded-xl border font-medium uppercase tracking-wider transition-all
               ${isActive
                 ? 'border-[#3A86FF] bg-[#3A86FF]/10 text-[#F5F5F5]'
                 : s.done
@@ -392,7 +395,7 @@ function StepNav({
                 : 'border-[#1E1E1E] bg-[#0F0F0F] text-[#484848]'
               }
             `}
-            style={{ fontSize: 13, letterSpacing: '0.04em' }}
+            style={{ fontSize: 16, letterSpacing: '0.04em' }}
           >
             {isLocked ? (
               <span>🔒</span>
@@ -446,14 +449,18 @@ function Step1Contract({
         ) : (
           <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
             <span className="text-7xl mb-6">📄</span>
-            <p className="text-[#484848] text-base">Le contrat n'a pas encore été uploadé par Robin.</p>
-            <p className="text-[#484848] text-sm mt-2">Il sera disponible très prochainement.</p>
+            <p className="text-[#484848] text-base font-medium uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>Le contrat n'a pas encore été uploadé par Robin.</p>
+            <p className="text-[#484848] text-base font-medium mt-2 uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>Il sera disponible très prochainement.</p>
           </div>
         )}
       </div>
 
+      <p className="text-center text-base font-medium text-[#F0F0F0] uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+        Ta signature — nom, date, heure — est enregistrée et constitue une preuve légale d'acceptation.
+      </p>
+
       {/* Acceptance checkbox */}
-      <label className="flex items-start gap-3 cursor-pointer group">
+      <label className="flex items-start gap-3 cursor-pointer group justify-center">
         <div className="relative mt-0.5">
           <input
             type="checkbox"
@@ -467,38 +474,38 @@ function Step1Contract({
             {accepted && <span className="text-white text-xs">✓</span>}
           </div>
         </div>
-        <span className="text-sm text-[#F0F0F0] leading-relaxed">
+        <span className="text-base font-medium text-[#F0F0F0] leading-relaxed uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
           J'ai lu et j'accepte les conditions générales du programme Projet180.
         </span>
       </label>
 
       {/* Signature name input */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-[#888888] uppercase tracking-wider mb-2">
+      <div className="space-y-2 flex flex-col items-center">
+        <label className="block text-base font-medium text-[#888888] uppercase tracking-wider mb-2 text-center" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
           Signature — tape ton prénom et nom complet
         </label>
         <input
           type="text"
           value={signatureName}
           onChange={e => onSignatureNameChange(e.target.value)}
-          placeholder="Prénom Nom"
-          className="w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-xl px-4 py-3 text-base text-[#F5F5F5] placeholder-[#444444] focus:outline-none focus:border-[#3A86FF] focus:shadow-[0_0_0_3px_rgba(58,134,255,0.12)] transition-all"
+          placeholder="PRÉNOM NOM"
+          className="max-w-xs w-full bg-[#0F0F0F] border border-[#1E1E1E] rounded-xl px-4 py-3 text-base font-medium text-[#F5F5F5] placeholder-[#444444] focus:outline-none focus:border-[#3A86FF] focus:shadow-[0_0_0_3px_rgba(58,134,255,0.12)] transition-all text-center uppercase tracking-wider"
+          style={{ fontFamily: "'Barlow Condensed', sans-serif" }}
         />
       </div>
 
       {/* Sign button */}
-      <P180Button
-        onClick={onSign}
-        disabled={!accepted || !signatureName.trim()}
-        loading={loading}
-        fullWidth
-      >
-        {loading ? 'Signature en cours…' : 'Signer le contrat'}
-      </P180Button>
-
-      <p className="text-center text-xs text-[#484848]">
-        Ta signature — nom, date, heure — est enregistrée et constitue une preuve légale d'acceptation.
-      </p>
+      <div className="flex justify-center">
+        <P180Button
+          onClick={onSign}
+          disabled={!accepted || !signatureName.trim()}
+          loading={loading}
+          className="text-base font-medium max-w-xs w-full uppercase tracking-wider"
+          style={{ fontFamily: "'Barlow Condensed', sans-serif" }}
+        >
+          {loading ? 'Signature en cours…' : 'Signer le contrat'}
+        </P180Button>
+      </div>
     </div>
   )
 }
@@ -539,16 +546,14 @@ function Step2Questionnaire({
           />
         ))}
       </div>
-      <p className="text-xs text-[#484848]">Section {section}/{totalSections}</p>
-
       {/* Section content */}
-      {section === 1 && <QSection1 q={questionnaire} setQ={setQ} />}
-      {section === 2 && <QSection2 q={questionnaire} setQ={setQ} />}
-      {section === 3 && <QSection3 q={questionnaire} setQ={setQ} />}
-      {section === 4 && <QSection4 q={questionnaire} setQ={setQ} />}
-      {section === 5 && <QSection5 q={questionnaire} setQ={setQ} />}
-      {section === 6 && <QSection6 q={questionnaire} setQ={setQ} />}
-      {section === 7 && <QSection7 q={questionnaire} setQ={setQ} />}
+      {section === 1 && <QSection1 q={questionnaire} setQ={setQ} sectionNum={1} totalSections={totalSections} />}
+      {section === 2 && <QSection2 q={questionnaire} setQ={setQ} sectionNum={2} totalSections={totalSections} />}
+      {section === 3 && <QSection3 q={questionnaire} setQ={setQ} sectionNum={3} totalSections={totalSections} />}
+      {section === 4 && <QSection4 q={questionnaire} setQ={setQ} sectionNum={4} totalSections={totalSections} />}
+      {section === 5 && <QSection5 q={questionnaire} setQ={setQ} sectionNum={5} totalSections={totalSections} />}
+      {section === 6 && <QSection6 q={questionnaire} setQ={setQ} sectionNum={6} totalSections={totalSections} />}
+      {section === 7 && <QSection7 q={questionnaire} setQ={setQ} sectionNum={7} totalSections={totalSections} />}
 
       {/* Navigation */}
       <div className="flex gap-3">
@@ -587,10 +592,10 @@ function Step2Questionnaire({
 
 // ─── Questionnaire Sections ────────────────────────────────────────────────────
 
-function QSection1({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: string, v: string | number) => void }) {
+function QSection1({ q, setQ, sectionNum, totalSections }: { q: typeof initialQuestionnaire; setQ: (k: string, v: string | number) => void; sectionNum?: number; totalSections?: number }) {
   return (
     <div className="space-y-5">
-      <QSectionTitle icon="👤" title="Identité" />
+      <QSectionTitle icon="👤" title="Identité" sectionNum={sectionNum} totalSections={totalSections} />
       <QInput label="Prénom et Nom" value={q.full_name} onChange={v => setQ('full_name', v)} placeholder="Ex : Thomas Martin" />
       <QInput label="Âge" type="number" value={q.age} onChange={v => setQ('age', v)} placeholder="Ex : 28" />
       <QInput label="Ville / Pays de résidence" value={q.city} onChange={v => setQ('city', v)} placeholder="Ex : Paris, France" />
@@ -612,10 +617,10 @@ function QSection1({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: stri
   )
 }
 
-function QSection2({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: string, v: string | number) => void }) {
+function QSection2({ q, setQ, sectionNum, totalSections }: { q: typeof initialQuestionnaire; setQ: (k: string, v: string | number) => void; sectionNum?: number; totalSections?: number }) {
   return (
     <div className="space-y-5">
-      <QSectionTitle icon="📊" title="Situation actuelle" />
+      <QSectionTitle icon="📊" title="Situation actuelle" sectionNum={sectionNum} totalSections={totalSections} />
       <QSlider label="CORPS — Physique, énergie, santé" value={q.score_body} onChange={v => setQ('score_body', v)} />
       <QSlider label="BUSINESS — Revenus, carrière, projets" value={q.score_business} onChange={v => setQ('score_business', v)} />
       <QSlider label="MENTAL — Clarté, discipline, confiance" value={q.score_mental} onChange={v => setQ('score_mental', v)} />
@@ -630,10 +635,10 @@ function QSection2({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: stri
   )
 }
 
-function QSection3({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: string, v: string | number) => void }) {
+function QSection3({ q, setQ, sectionNum, totalSections }: { q: typeof initialQuestionnaire; setQ: (k: string, v: string | number) => void; sectionNum?: number; totalSections?: number }) {
   return (
     <div className="space-y-5">
-      <QSectionTitle icon="💼" title="Business & Finances" />
+      <QSectionTitle icon="💼" title="Business & Finances" sectionNum={sectionNum} totalSections={totalSections} />
       <QTextarea label="Décris ton activité professionnelle en 3 phrases" value={q.business_description} onChange={v => setQ('business_description', v)} rows={3} />
       <QInput label="Objectif financier dans les 6 prochains mois (chiffre précis)" value={q.financial_goal} onChange={v => setQ('financial_goal', v)} placeholder="Ex : 8 000€/mois" />
       <QTextarea label="Plus gros blocage business en ce moment ?" value={q.business_blocker} onChange={v => setQ('business_blocker', v)} />
@@ -642,10 +647,10 @@ function QSection3({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: stri
   )
 }
 
-function QSection4({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: string, v: string | number) => void }) {
+function QSection4({ q, setQ, sectionNum, totalSections }: { q: typeof initialQuestionnaire; setQ: (k: string, v: string | number) => void; sectionNum?: number; totalSections?: number }) {
   return (
     <div className="space-y-5">
-      <QSectionTitle icon="🧠" title="Mental & Mindset" />
+      <QSectionTitle icon="🧠" title="Mental & Mindset" sectionNum={sectionNum} totalSections={totalSections} />
       <QTextarea label="La chose qui te frustre le plus dans ta vie actuelle ?" value={q.frustration} onChange={v => setQ('frustration', v)} />
       <QTextarea label="Ce que tu remettrais toujours au lendemain si personne ne te tenait accountable ?" value={q.procrastination} onChange={v => setQ('procrastination', v)} />
       <QTextarea label="Quel schéma répétitif tu observes chez toi ?" value={q.patterns} onChange={v => setQ('patterns', v)} />
@@ -655,10 +660,10 @@ function QSection4({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: stri
   )
 }
 
-function QSection5({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: string, v: string | number) => void }) {
+function QSection5({ q, setQ, sectionNum, totalSections }: { q: typeof initialQuestionnaire; setQ: (k: string, v: string | number) => void; sectionNum?: number; totalSections?: number }) {
   return (
     <div className="space-y-5">
-      <QSectionTitle icon="🌍" title="Lifestyle & Social" />
+      <QSectionTitle icon="🌍" title="Lifestyle & Social" sectionNum={sectionNum} totalSections={totalSections} />
       <QTextarea label="Es-tu en couple ? Si oui, depuis combien de temps ?" value={q.relationship} onChange={v => setQ('relationship', v)} />
       <QTextarea label="Ton cercle social actuel en 2 phrases" value={q.social_circle} onChange={v => setQ('social_circle', v)} />
       <QInput label="Tu voyages régulièrement ou ancré dans une ville ?" value={q.travel} onChange={v => setQ('travel', v)} />
@@ -667,10 +672,10 @@ function QSection5({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: stri
   )
 }
 
-function QSection6({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: string, v: string | number) => void }) {
+function QSection6({ q, setQ, sectionNum, totalSections }: { q: typeof initialQuestionnaire; setQ: (k: string, v: string | number) => void; sectionNum?: number; totalSections?: number }) {
   return (
     <div className="space-y-5">
-      <QSectionTitle icon="🎯" title="Objectifs & Engagement" />
+      <QSectionTitle icon="🎯" title="Objectifs & Engagement" sectionNum={sectionNum} totalSections={totalSections} />
       <QTextarea label="À quoi ressemble ta vie dans 6 mois si ce coaching est un succès total ?" value={q.success_vision} onChange={v => setQ('success_vision', v)} rows={4} />
       <QTextarea label="L'OBJECTIF N°1 à atteindre avec ce coaching (un seul)" value={q.main_goal} onChange={v => setQ('main_goal', v)} />
       <QTextarea label="Ce que tu as déjà essayé qui n'a pas marché ?" value={q.tried_failed} onChange={v => setQ('tried_failed', v)} />
@@ -687,10 +692,10 @@ function QSection6({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: stri
   )
 }
 
-function QSection7({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: string, v: string | number) => void }) {
+function QSection7({ q, setQ, sectionNum, totalSections }: { q: typeof initialQuestionnaire; setQ: (k: string, v: string | number) => void; sectionNum?: number; totalSections?: number }) {
   return (
     <div className="space-y-6">
-      <QSectionTitle icon="💬" title="Pour finir" />
+      <QSectionTitle icon="💬" title="Pour finir" sectionNum={sectionNum} totalSections={totalSections} />
       <QTextarea
         label="Y a-t-il quelque chose que je devrais savoir sur toi que ce questionnaire n'a pas couvert ?"
         value={q.anything_else}
@@ -699,10 +704,10 @@ function QSection7({ q, setQ }: { q: typeof initialQuestionnaire; setQ: (k: stri
         placeholder="Libre à toi…"
       />
       <div className="rounded-xl border border-[#1E1E1E] bg-[#0F0F0F] p-5 space-y-3">
-        <p className="text-sm text-[#888888] leading-relaxed">
+        <p className="text-base text-[#3A86FF] leading-relaxed uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
           Merci d'avoir pris le temps de remplir ce questionnaire. Ce que tu viens d'écrire, c'est déjà un acte de lucidité sur toi-même. La transformation commence ici.
         </p>
-        <p className="text-sm text-[#3A86FF] font-medium">— Robin</p>
+        <p className="text-base text-[#3A86FF] font-medium uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>— Robin</p>
       </div>
     </div>
   )
@@ -737,11 +742,11 @@ function Step3Link({
 
       <div className="rounded-xl border border-[#1E1E1E] bg-[#0F0F0F] p-6 text-center space-y-4">
         <div className="text-7xl">{icon}</div>
-        <p className="text-[#484848] text-sm leading-relaxed">{details ?? description}</p>
+        <p className="text-[#484848] text-base leading-relaxed uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{details ?? description}</p>
         <P180Button onClick={onConfirm} fullWidth>
           {hasLink ? `${cta} →` : 'Passer cette étape →'}
         </P180Button>
-        <p className="text-xs text-[#484848]">
+        <p className="text-sm text-[#484848] uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
           {hasLink
             ? "Le lien s'ouvre dans un nouvel onglet. Cette étape sera automatiquement validée."
             : "Le lien n'est pas encore configuré par Robin. Tu peux passer pour l'instant."}
@@ -768,7 +773,7 @@ function Step5Call({
         className="text-4xl sm:text-5xl font-black uppercase text-[#F0F0F0]"
         style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800 }}
       >Mission accomplie</h2>
-      <p className="text-sm text-[#888888] leading-relaxed">Ton premier call est réservé. Robin te contactera prochainement.</p>
+      <p className="text-base text-[#888888] leading-relaxed uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>Ton premier call est réservé. Robin te contactera prochainement.</p>
     </div>
   )
 
@@ -785,10 +790,10 @@ function Step5Call({
 
       {!unlocked ? (
         <div className="rounded-xl border border-[#1E1E1E] bg-[#0F0F0F] p-8 text-center space-y-4">
-          <p className="text-[#484848] text-sm">Complete les étapes 1 à 4 pour débloquer la réservation.</p>
+          <p className="text-[#484848] text-base uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>Complete les étapes 1 à 4 pour débloquer la réservation.</p>
           <div className="space-y-2 text-left mt-4">
             {['Contrat signé', 'Questionnaire rempli', 'WhatsApp rejoint', 'Skool rejoint'].map((l, i) => (
-              <p key={i} className="text-xs text-[#484848] flex items-center gap-2">
+              <p key={i} className="text-sm text-[#484848] flex items-center gap-2 uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
                 <span className="text-[#3A86FF]">→</span> {l}
               </p>
             ))}
@@ -797,8 +802,8 @@ function Step5Call({
       ) : (
         <div className="rounded-xl border border-[#3A86FF]/30 bg-[#3A86FF]/5 p-6 text-center space-y-4">
           <div className="text-6xl">📞</div>
-          <p className="text-[#F5F5F5] text-sm font-medium">Tu y es. Robin t'attend.</p>
-          <p className="text-[#484848] text-sm leading-relaxed">
+          <p className="text-[#F5F5F5] text-base font-medium uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>Tu y es. Robin t'attend.</p>
+          <p className="text-[#484848] text-base leading-relaxed uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
             Choisis le créneau qui te convient. Ce call de démarrage est le point de lancement de ta transformation.
           </p>
           <P180Button onClick={onBook} fullWidth>
@@ -812,20 +817,14 @@ function Step5Call({
 
 // ─── Reusable UI ──────────────────────────────────────────────────────────────
 
-function StepHeader({ number, title, subtitle }: { number: string; title: string; subtitle: string }) {
+function StepHeader({ title, subtitle }: { number?: string; title: string; subtitle: string }) {
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-3">
-        <span className="text-[#3A86FF] text-xs font-black tracking-widest uppercase"
-          style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '0.1em' }}
-        >{number}</span>
-        <div className="h-px flex-1 bg-[#1E1E1E]" />
-      </div>
+    <div className="space-y-3 text-center">
       <h1
-        className="text-4xl sm:text-5xl font-black text-[#F0F0F0] leading-none uppercase"
+        className="text-5xl sm:text-6xl font-black text-[#F0F0F0] leading-none uppercase"
         style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800 }}
       >{title}</h1>
-      <p className="text-sm text-[#888888] leading-relaxed">{subtitle}</p>
+      <p className="text-base font-medium text-[#888888] leading-relaxed uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{subtitle}</p>
     </div>
   )
 }
@@ -839,7 +838,7 @@ function StepDone({ label, onContinue }: { label: string; onContinue: () => void
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
-        <p className="text-[#F2F2F5] text-sm font-black uppercase tracking-widest">{label}</p>
+        <p className="text-[#F2F2F5] text-base font-black uppercase tracking-widest" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{label}</p>
       </div>
       <P180Button onClick={onContinue} fullWidth>
         Continuer →
@@ -848,12 +847,18 @@ function StepDone({ label, onContinue }: { label: string; onContinue: () => void
   )
 }
 
-function QSectionTitle({ title }: { icon?: string; title: string }) {
+function QSectionTitle({ icon, title, sectionNum, totalSections }: { icon?: string; title: string; sectionNum?: number; totalSections?: number }) {
   return (
-    <div className="pb-1 border-b border-[#1E1E1E]">
+    <div className="pb-2 border-b border-[#1E1E1E] text-center space-y-1">
+      {sectionNum != null && totalSections != null && (
+        <p className="text-sm text-[#484848] uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+          Section {sectionNum}/{totalSections}
+        </p>
+      )}
       <span
-        className="text-base font-bold uppercase text-[#888888] tracking-wider"
-      >{title}</span>
+        className="text-lg font-bold uppercase text-[#888888] tracking-wider"
+        style={{ fontFamily: "'Barlow Condensed', sans-serif" }}
+      >{icon && `${icon}  `}{title}</span>
     </div>
   )
 }
@@ -866,7 +871,7 @@ function QInput({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-[#888888] uppercase tracking-wider">{label}</label>
+      <label className="block text-base font-medium text-[#888888] uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{label}</label>
       <input
         type={type}
         value={value}
@@ -886,7 +891,7 @@ function QTextarea({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-[#888888] uppercase tracking-wider">{label}</label>
+      <label className="block text-base font-medium text-[#888888] uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{label}</label>
       <textarea
         value={value}
         onChange={e => onChange(e.target.value)}
@@ -905,7 +910,7 @@ function QSelect({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-[#888888] uppercase tracking-wider">{label}</label>
+      <label className="block text-base font-medium text-[#888888] uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{label}</label>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
@@ -926,7 +931,7 @@ function QSlider({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-[#888888] uppercase tracking-wider">{label}</label>
+        <label className="text-base font-medium text-[#888888] uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{label}</label>
         <span className="text-lg font-black text-[#3A86FF]">{value}/10</span>
       </div>
       <input
@@ -937,7 +942,7 @@ function QSlider({
         onChange={e => onChange(Number(e.target.value))}
         className="w-full accent-[#3A86FF]"
       />
-      <div className="flex justify-between text-xs text-[#484848]">
+      <div className="flex justify-between text-sm text-[#484848] uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
         <span>1 — Très mauvais</span>
         <span>10 — Excellent</span>
       </div>
@@ -950,7 +955,7 @@ function LoadingScreen() {
     <div className="min-h-screen bg-[#060606] flex items-center justify-center">
       <div className="space-y-3 text-center">
         <P180Logo size="md" />
-        <div className="text-[#484848] text-xs animate-pulse">Chargement…</div>
+        <div className="text-[#484848] text-sm animate-pulse uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>Chargement…</div>
       </div>
     </div>
   )

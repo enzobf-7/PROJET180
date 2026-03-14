@@ -14,6 +14,7 @@ export const C = {
   accentL: '#2B75EE',
   green:   '#15803D',
   greenL:  '#22C55E',
+  gold:    '#C9A84C',
 } as const
 
 /** Barlow Condensed — titres, labels, boutons */

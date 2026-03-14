@@ -1,24 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import P180Logo from '@/components/P180Logo'
-
-// ─── Design tokens ────────────────────────────────────────────────────────────
-const C = {
-  bg:      '#060606',
-  surface: '#0F0F0F',
-  sidebar: '#060606',
-  border:  '#1E1E1E',
-  muted:   '#484848',
-  dimmed:  '#1E1E1E',
-  text:    '#F2F2F5',
-  accent:  '#3A86FF',
-  gold:    '#C9A84C',
-}
-const D = { fontFamily: '"Barlow Condensed", sans-serif' } as const
-const M = { fontFamily: '"JetBrains Mono", monospace' }    as const
+import { C, D, M } from '@/lib/design-tokens'
+import { TopBar } from '@/app/dashboard/components/TopBar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type ModuleType = 'video' | 'lecture' | 'exercise' | 'call' | 'podcast' | 'challenge' | 'bonus'
@@ -66,27 +52,6 @@ const PHASES = [
 
 import { getCurrentLevel } from '@/lib/levels'
 
-// ─── useCountdown ─────────────────────────────────────────────────────────────
-function useCountdown(startDate: string | null) {
-  const [t, setT] = useState({ d: 0, h: 0, m: 0, s: 0 })
-  useEffect(() => {
-    const tick = () => {
-      if (!startDate) return
-      const diff = Math.max(0, new Date(startDate).getTime() + 180 * 86400000 - Date.now())
-      setT({
-        d: Math.floor(diff / 86400000),
-        h: Math.floor((diff % 86400000) / 3600000),
-        m: Math.floor((diff % 3600000) / 60000),
-        s: Math.floor((diff % 60000) / 1000),
-      })
-    }
-    tick()
-    const id = setInterval(tick, 1000)
-    return () => clearInterval(id)
-  }, [startDate])
-  return t
-}
-const p2 = (n: number) => String(n).padStart(2, '0')
 
 // ─── Module type config ───────────────────────────────────────────────────────
 const MODULE_CONFIG: Record<ModuleType, { label: string; color: string }> = {
@@ -111,11 +76,10 @@ function formatDuration(minutes: number): string {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function ProgrammeClient({
-  jourX, firstName, gamification, content, onboardingDate,
+  jourX, firstName, gamification, content,
 }: Props) {
   const router   = useRouter()
   const supabase = createClient()
-  const countdown = useCountdown(onboardingDate)
 
   const currentWeek     = Math.min(Math.ceil(jourX / 7), 26)
   const currentPhaseObj = PHASES.find(p => p.weeks.includes(currentWeek))
@@ -155,123 +119,19 @@ export default function ProgrammeClient({
   ]
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: C.bg, color: C.text, overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: C.bg, color: C.text, overflowX: 'hidden' }}>
 
-      {/* ── Sidebar ───────────────────────────────────────────────────────────── */}
-      <aside style={{
-        width: 220, flexShrink: 0,
-        background: C.sidebar,
-        borderRight: `1px solid ${C.border}`,
-        display: 'flex', flexDirection: 'column',
-        position: 'fixed', top: 0, left: 0, bottom: 0,
-        zIndex: 50,
-      }}>
-        {/* Logo */}
-        <div style={{ padding: '20px 20px 18px', borderBottom: `1px solid ${C.border}` }}>
-          <P180Logo size="sm" />
-        </div>
-
-        {/* Nav */}
-        <nav style={{ padding: '20px 16px', flex: 1 }}>
-          {navItems.map(item => (
-            <a key={item.href} href={item.href} style={{
-              display: 'block',
-              padding: '9px 12px',
-              marginBottom: 2,
-              ...D,
-              fontWeight: 700,
-              fontSize: '13px',
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase' as const,
-              textDecoration: 'none',
-              color:      item.active ? C.text : C.muted,
-              background: item.active ? C.border : 'transparent',
-              borderLeft: item.active ? `2px solid ${C.accent}` : '2px solid transparent',
-            }}>
-              {item.label}
-            </a>
-          ))}
-        </nav>
-
-        {/* Programme bar */}
-        <div style={{ padding: '0 20px 20px' }}>
-          <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.2em', color: C.muted, textTransform: 'uppercase' as const, marginBottom: 8 }}>
-            Jour {jourX} / 180
-          </div>
-          <div style={{ height: 2, background: C.border }}>
-            <div style={{ height: '100%', width: `${daysPct}%`, background: C.accent }} />
-          </div>
-        </div>
-
-        {/* User footer */}
-        <div style={{
-          borderTop: `1px solid ${C.border}`,
-          padding: '16px 20px',
-          display: 'flex', alignItems: 'center', gap: 10,
-        }}>
-          <div style={{
-            width: 32, height: 32, flexShrink: 0,
-            background: C.accent,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <span style={{ ...D, fontWeight: 900, fontSize: '13px', color: 'white' }}>
-              {firstName.charAt(0).toUpperCase()}
-            </span>
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ ...D, fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: C.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {firstName}
-            </div>
-            <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.15em', color: C.accent, textTransform: 'uppercase' as const }}>
-              {level.name}
-            </div>
-          </div>
-          <button onClick={handleSignOut} title="Déconnexion" style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: C.muted, fontSize: '18px', lineHeight: 1, padding: 4,
-          }}>
-            ⏻
-          </button>
-        </div>
-      </aside>
+      <TopBar
+        jourX={jourX}
+        daysLeft={daysLeft}
+        daysPct={daysPct}
+        firstName={firstName}
+        navItems={navItems}
+        onSignOut={handleSignOut}
+      />
 
       {/* ── Main ──────────────────────────────────────────────────────────────── */}
-      <main style={{ flex: 1, marginLeft: 220, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-
-        {/* ── Sticky header ─────────────────────────────────────────────────── */}
-        <header style={{
-          position: 'sticky', top: 0, zIndex: 40,
-          background: 'rgba(6,6,6,0.90)',
-          backdropFilter: 'blur(14px)',
-          borderBottom: `1px solid ${C.border}`,
-        }}>
-          <div style={{ height: 2, background: C.dimmed }}>
-            <div style={{ height: '100%', width: `${daysPct}%`, background: C.accent, transition: 'width 1.2s ease' }} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 40px' }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-              <span style={{ ...D, fontWeight: 900, fontSize: '26px', letterSpacing: '0.06em', color: C.text, lineHeight: 1 }}>
-                JOUR {jourX}
-              </span>
-              <span style={{ ...M, fontSize: '11px', color: C.muted }}>/ 180 — {daysLeft}j restants</span>
-            </div>
-            {onboardingDate && (
-              <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-                {[
-                  { v: countdown.d, u: 'j' },
-                  { v: countdown.h, u: 'h' },
-                  { v: countdown.m, u: 'm' },
-                  { v: countdown.s, u: 's' },
-                ].map(({ v, u }, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
-                    <span style={{ ...M, fontSize: '15px', fontWeight: 700, color: i === 3 ? C.accent : C.text }}>{p2(v)}</span>
-                    <span style={{ ...D, fontWeight: 700, fontSize: '9px', color: C.muted, letterSpacing: '0.1em' }}>{u}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </header>
+      <main style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 110px)' }}>
 
         {/* ── Hero ──────────────────────────────────────────────────────────── */}
         <div style={{

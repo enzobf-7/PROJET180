@@ -3,7 +3,14 @@
 import { memo } from 'react'
 import { C, D, M } from '@/lib/design-tokens'
 
-const STREAK_MILESTONES = [7, 14, 21, 30, 60, 90]
+const STREAK_MILESTONES = [
+  { days: 7,  multiplier: '×1.5 XP' },
+  { days: 14, multiplier: '×2 XP' },
+  { days: 21, multiplier: '' },
+  { days: 30, multiplier: '×3 XP' },
+  { days: 60, multiplier: '' },
+  { days: 90, multiplier: '' },
+]
 
 interface Badge {
   key: string
@@ -11,6 +18,9 @@ interface Badge {
   icon: string
   earned: boolean
   desc: string
+  target: number
+  current: number
+  unit: string
 }
 
 interface Props {
@@ -29,6 +39,14 @@ export const ProgressionPanel = memo(function ProgressionPanel({
   badges, earnedCount,
   objectifText, visionText, whatsappLink,
 }: Props) {
+  // Find next streak milestone
+  const nextMilestone = STREAK_MILESTONES.find(m => streak < m.days)
+  const daysToNext = nextMilestone ? nextMilestone.days - streak : null
+
+  // Split badges into categories
+  const streakBadges = badges.filter(b => ['week_fire', 'fortnight', 'month_king'].includes(b.key))
+  const xpBadges = badges.filter(b => !['week_fire', 'fortnight', 'month_king'].includes(b.key))
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
@@ -44,29 +62,60 @@ export const ProgressionPanel = memo(function ProgressionPanel({
           <div style={{ ...D, fontWeight: 800, fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: C.text }}>
             Série en cours
           </div>
-          <div style={{ ...M, fontWeight: 700, fontSize: '20px', color: legendStreak ? '#F59E0B' : hotStreak ? '#F59E0B' : C.text }}>
+          <div style={{
+            ...M, fontWeight: 700, fontSize: '24px',
+            color: legendStreak ? '#F59E0B' : hotStreak ? '#F59E0B' : C.text,
+            ...(hotStreak ? { textShadow: '0 0 12px rgba(245,158,11,0.3)' } : {}),
+          }}>
             {streak}j {legendStreak ? '👑' : hotStreak ? '🔥' : ''}
           </div>
         </div>
+
+        {/* Milestone bars */}
         <div style={{ display: 'flex', gap: 6 }}>
           {STREAK_MILESTONES.map(m => (
-            <div key={m} style={{
-              flex: 1, height: 4, borderRadius: 2,
-              background: streak >= m ? (m >= 30 ? '#F59E0B' : C.accent) : C.dimmed,
+            <div key={m.days} style={{
+              flex: 1, height: 8, borderRadius: 4,
+              background: streak >= m.days ? (m.days >= 30 ? '#F59E0B' : C.accent) : C.dimmed,
               transition: 'background 0.4s',
             }} />
           ))}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+
+        {/* Milestone labels */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
           {STREAK_MILESTONES.map(m => (
-            <span key={m} style={{ ...M, fontSize: '8px', color: streak >= m ? C.text : C.muted, flex: 1, textAlign: 'center' }}>
-              {m}j
-            </span>
+            <div key={m.days} style={{ flex: 1, textAlign: 'center' }}>
+              <div style={{ ...M, fontSize: '9px', color: streak >= m.days ? C.text : C.muted, fontWeight: 700 }}>
+                {m.days}j
+              </div>
+              {m.multiplier && (
+                <div style={{ ...M, fontSize: '7px', color: streak >= m.days ? C.accent : C.muted, marginTop: 1 }}>
+                  {m.multiplier}
+                </div>
+              )}
+            </div>
           ))}
         </div>
+
+        {/* Next milestone indicator */}
+        {daysToNext != null && (
+          <div style={{
+            marginTop: 12, padding: '8px 12px',
+            background: C.bg, borderRadius: 8,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+          }}>
+            <span style={{ ...D, fontWeight: 600, fontSize: '11px', color: C.muted, letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>
+              Prochain palier
+            </span>
+            <span style={{ ...M, fontWeight: 700, fontSize: '12px', color: C.accent }}>
+              dans {daysToNext}j
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* Badges card */}
+      {/* Badges card — redesigned with descriptions and progress */}
       <div className="p180-fade p180-card" style={{
         background: C.surface,
         border: `1px solid ${C.border}`,
@@ -74,29 +123,37 @@ export const ProgressionPanel = memo(function ProgressionPanel({
         padding: '18px 20px',
         animationDelay: '0.1s',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div style={{ ...D, fontWeight: 800, fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: C.text }}>
             Badges
           </div>
           <span style={{ ...M, fontSize: '10px', color: C.muted }}>{earnedCount}/{badges.length}</span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-          {badges.map(b => (
-            <div key={b.key} title={`${b.label}: ${b.desc}`} style={{
-              textAlign: 'center',
-              padding: '10px 4px 8px',
-              background: b.earned ? `${C.accent}10` : C.bg,
-              border: `1px solid ${b.earned ? `${C.accent}30` : C.border}`,
-              borderRadius: 8,
-              opacity: b.earned ? 1 : 0.4,
-              transition: 'opacity 0.3s, background 0.3s',
-            }}>
-              <div style={{ fontSize: '20px', lineHeight: 1, marginBottom: 4 }}>{b.icon}</div>
-              <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.05em', color: b.earned ? C.text : C.muted, lineHeight: 1.2 }}>
-                {b.label}
-              </div>
-            </div>
-          ))}
+
+        {/* Streak badges */}
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.2em', color: C.muted, textTransform: 'uppercase' as const, marginBottom: 8 }}>
+            Badges de série
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {streakBadges.map(b => (
+              <BadgeRow key={b.key} badge={b} />
+            ))}
+          </div>
+        </div>
+
+        <div style={{ height: 1, background: C.border, margin: '0 0 14px' }} />
+
+        {/* XP badges */}
+        <div>
+          <div style={{ ...D, fontWeight: 700, fontSize: '9px', letterSpacing: '0.2em', color: C.muted, textTransform: 'uppercase' as const, marginBottom: 8 }}>
+            Badges d&apos;XP
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {xpBadges.map(b => (
+              <BadgeRow key={b.key} badge={b} />
+            ))}
+          </div>
         </div>
       </div>
 
@@ -159,3 +216,44 @@ export const ProgressionPanel = memo(function ProgressionPanel({
     </div>
   )
 })
+
+// ── Badge row with progress ────────────────────────────────────────────────
+function BadgeRow({ badge: b }: { badge: Badge }) {
+  const pct = Math.round((b.current / b.target) * 100)
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 12,
+      padding: '8px 10px',
+      background: b.earned ? `${C.accent}08` : 'transparent',
+      border: `1px solid ${b.earned ? `${C.accent}20` : 'transparent'}`,
+      borderRadius: 8,
+      ...(b.earned ? { boxShadow: `0 0 8px ${C.accent}15` } : {}),
+    }}>
+      <span style={{ fontSize: '22px', lineHeight: 1, flexShrink: 0, opacity: b.earned ? 1 : 0.4 }}>
+        {b.icon}
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+          <span style={{ ...D, fontWeight: 700, fontSize: '12px', color: b.earned ? C.text : C.muted, letterSpacing: '0.04em' }}>
+            {b.label}
+          </span>
+          {b.earned ? (
+            <span style={{ ...M, fontSize: '10px', color: C.greenL, fontWeight: 700 }}>✓</span>
+          ) : (
+            <span style={{ ...M, fontSize: '9px', color: C.muted }}>
+              {b.current.toLocaleString('fr-FR')}/{b.target.toLocaleString('fr-FR')} {b.unit}
+            </span>
+          )}
+        </div>
+        <div style={{ ...M, fontSize: '9px', color: C.muted, marginTop: 2 }}>
+          {b.desc}
+        </div>
+        {!b.earned && (
+          <div style={{ height: 3, background: C.dimmed, borderRadius: 2, marginTop: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${pct}%`, background: C.accent, borderRadius: 2, transition: 'width 0.6s' }} />
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

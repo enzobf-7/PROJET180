@@ -21,7 +21,7 @@ const VARIANTS = {
 const SIZES = {
   sm: 'py-2 px-3 text-xs rounded-lg',
   md: 'py-3 px-4 text-sm rounded-xl',
-  lg: 'py-3.5 px-6 text-sm rounded-xl',
+  lg: 'py-3.5 px-8 text-base rounded-xl',
 }
 
 export const P180Button = forwardRef<HTMLButtonElement, P180ButtonProps>(
@@ -46,11 +46,12 @@ export const P180Button = forwardRef<HTMLButtonElement, P180ButtonProps>(
           VARIANTS[variant],
           SIZES[size],
           fullWidth ? 'w-full' : '',
-          'transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2',
+          'transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 uppercase tracking-wider',
           className,
         ]
           .filter(Boolean)
           .join(' ')}
+        style={{ fontFamily: "'Barlow Condensed', sans-serif" }}
         {...props}
       >
         {loading ? (
